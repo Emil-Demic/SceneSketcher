@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import os
-import sys
-import cv2
-import numpy as np
 import torch
 import time
 import argparse
-import random
+
 # Training settings
 parser = argparse.ArgumentParser()
 parser.add_argument('--no-cuda', action='store_true', default=False,
@@ -31,7 +28,6 @@ args.cuda = not args.no_cuda and torch.cuda.is_available()
 nowTime = time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime())
 
 featureType = "GraphFeatures"
-featureTypeDict = {"GraphFeatures": "GraphFeatures"}
 featureNumDict = {"GraphFeatures": 2052}
 model_path = "./model/"
 Result_Step = 5
@@ -50,31 +46,23 @@ imageImgTestPath=r"test/image/Image"
 sketchImgTrainPath = r"train/sketch/Image"
 sketchImgTestPath = r"test/sketch/Image"
 
-# ------------------------------------sketch Features For train-------------------------
-sketchVPath = os.path.join(r"train/sketch", featureTypeDict[featureType])
-sketchEPath = r"train/sketch/GraphEdges"
+# ------------------------------------sketch Features For train and test-------------------------
+sketchVPath = "train/sketch/GraphFeatures"
 
-# ------------------------------------sketch  Features For test-------------------------
-sketchVPathTest = os.path.join(r"test/sketch", featureTypeDict[featureType])
-sketchEPathTest = r"test/sketch/GraphEdges"
+sketchVPathTest = "test/sketchGraphFeatures"
 
 
-# ------------------------------------image  Features For train and test-------------------------
+# ------------------------------------image Features For train and test-------------------------
 
-imageVPath = os.path.join(r"train/image",featureTypeDict[featureType])
-imageEPath = r"train/image/GraphEdges"
+imageVPath = "train/image/GraphFeatures"
 
-imageVPathTest = os.path.join(r"test/image", featureTypeDict[featureType])
-imageEPathTest = r"test/image/GraphEdges"
+imageVPathTest = "test/image/GraphFeatures"
+
 
 shuffleListTest = os.listdir(sketchVPathTest)
 batchesTest = len(shuffleListTest)
 shuffleListTest = [int(x.split(".")[0]) for x in shuffleListTest]
 
-
 imgTestList = os.listdir(imageImgTestPath)
 
-testList=shuffleListTest
-
-print(testList)
-batchImgTest = len(testList)
+print(shuffleListTest)
