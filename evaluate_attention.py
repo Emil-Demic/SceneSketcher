@@ -123,7 +123,7 @@ for i in os.listdir("model"):
 
         for batchIndex in tqdm.tqdm(range(batchesTest)):
             image_list, label_list, bbox_list, img, adj, corr, area_dict, category_list = loadDataDirectTest("image",
-                                                                                                             testList,
+                                                                                                             shuffleListTest,
                                                                                                              batchIndex)
             p = model.get_embedding(image_list, label_list, bbox_list, img, adj, corr)
             pList.append(p.cpu().numpy()[0])

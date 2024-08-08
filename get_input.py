@@ -5,34 +5,13 @@ import cv2
 import numpy as np
 import scipy.sparse as sp
 import torch
+from config import num_categories
 
-# CATEGORY_NUMBERS = 32
-CATEGORY_NUMBERS = 15
 word2vec = []
-with open("classFeature.csv", "r")as f:
+with open("classFeature.csv", "r") as f:
     lines = f.readlines()
     for line in lines:
         word2vec.append([float(x) for x in line.strip().split(",")])
-
-
-def normalize(mx):
-    """Row-normalize sparse matrix"""
-    rowsum = np.array(mx.sum(1))
-    r_inv = np.power(rowsum, -1).flatten()
-    r_inv[np.isinf(r_inv)] = 0.
-    r_mat_inv = sp.diags(r_inv)
-    mx = r_mat_inv.dot(mx)
-    return mx
-
-
-def sparse_mx_to_torch_sparse_tensor(sparse_mx):
-    """Convert a scipy sparse matrix to a torch sparse tensor."""
-    sparse_mx = sparse_mx.tocoo().astype(np.float32)
-    indices = torch.from_numpy(
-        np.vstack((sparse_mx.row, sparse_mx.col)).astype(np.int64))
-    values = torch.from_numpy(sparse_mx.data)
-    shape = torch.Size(sparse_mx.shape)
-    return torch.sparse.FloatTensor(indices, values, shape)
 
 
 def cosSim(x, y):
@@ -49,13 +28,7 @@ def euDistance(x, y):
     return distance
 
 
-def standardization(data):
-    mu = np.mean(data, axis=0)
-    sigma = np.std(data, axis=0)
-    return (data - mu) / sigma
-
-
-def loadData(vpath, epath, imgpath):
+def loadData(vpath, imgpath):
 
     assert os.path.exists(vpath)
     assert os.path.exists(imgpath)
@@ -66,16 +39,15 @@ def loadData(vpath, epath, imgpath):
     features = []
     label_list = []
     image_list = []
-    bbox_list=[]
+    bbox_list = []
     category_dict = {}
 
-
     category_list = []
-    corr = np.zeros((CATEGORY_NUMBERS, CATEGORY_NUMBERS))
-    adj = np.zeros((CATEGORY_NUMBERS, CATEGORY_NUMBERS))
+    corr = np.zeros((num_categories, num_categories))
+    adj = np.zeros((num_categories, num_categories))
     area_dict = {}
     area_count = 0
-    with open(vpath, 'r+')as f:
+    with open(vpath, 'r+') as f:
         lines = f.readlines()
         for idx in range(len(lines)):
             line = lines[idx]
@@ -85,7 +57,7 @@ def loadData(vpath, epath, imgpath):
                 # print(bbox)
                 if bbox[3] > img_height or bbox[2] > img_width:
                     continue
-                if (bbox[3] - bbox[1]) <32 or (bbox[2] - bbox[0])<32:
+                if (bbox[3] - bbox[1]) < 32 or (bbox[2] - bbox[0]) < 32:
                     continue
                 bbox_img = img[bbox[1]:bbox[3], bbox[0]:bbox[2], :]
                 area_dict[area_count] = ((bbox[3] - bbox[1]) * (bbox[2] - bbox[0]), int(fea[1]))
@@ -102,29 +74,27 @@ def loadData(vpath, epath, imgpath):
                 label_list.append(int(fea[1]))
                 features.append(fea[:])
 
-
-    for i in range(CATEGORY_NUMBERS):
+    for i in range(num_categories):
         if corr[i, i] == 1:
-            for j in range(i + 1, CATEGORY_NUMBERS):
+            for j in range(i + 1, num_categories):
                 if corr[j, j] == 1:
                     sim = cosSim(word2vec[i], word2vec[j])
                     corr[i, j] = sim
                     corr[j, i] = sim
 
-    for i in range(CATEGORY_NUMBERS):
+    for i in range(num_categories):
         category_list.append([])
-    for i in range(CATEGORY_NUMBERS):
+    for i in range(num_categories):
         if i in category_dict.keys():
             category_list[i] = list(np.mean(category_dict[i], axis=0)) + [len(category_dict[i])]
         else:
             category_list[i] = [0, 0, 0, 0, 0]
 
-    for i in range(CATEGORY_NUMBERS):
-
-        for j in range(i + 1, CATEGORY_NUMBERS):
+    for i in range(num_categories):
+        for j in range(i + 1, num_categories):
             if i in category_dict.keys() and j in category_dict.keys():
                 distance = euDistance(category_list[i], category_list[j])
-                distance=1.0-distance
+                distance = 1.0 - distance
                 # distance=1.0/distance
                 # print(distance)
 
@@ -134,5 +104,4 @@ def loadData(vpath, epath, imgpath):
     img = cv2.resize(img, (128, 128))
     area_dict = sorted(area_dict.items(), key=lambda area_dict: area_dict[1][0], reverse=True)
 
-    return image_list, label_list, bbox_list, img, adj, corr, area_dict,category_list
-
+    return image_list, label_list, bbox_list, img, adj, corr, area_dict, category_list

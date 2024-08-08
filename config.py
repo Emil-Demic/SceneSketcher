@@ -27,6 +27,7 @@ args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
 nowTime = time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime())
 
+num_categories = 15
 featureDim = 2052
 model_path = "./model/"
 Result_Step = 5
