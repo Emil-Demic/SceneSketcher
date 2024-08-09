@@ -49,7 +49,7 @@ sketchImgTestPath = r"test/sketch/Image"
 # ------------------------------------sketch Features For train and test-------------------------
 sketchVPath = "train/sketch/GraphFeatures"
 
-sketchVPathTest = "test/sketchGraphFeatures"
+sketchVPathTest = "test/sketch/GraphFeatures"
 
 
 # ------------------------------------image Features For train and test-------------------------
