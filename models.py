@@ -19,8 +19,8 @@ class GCNAttention(nn.Module):
     def __init__(self, gcn_input_shape, gcn_output_shape):
         super(GCNAttention, self).__init__()
 
-        self.image_bbox_extract_net = get_network("inceptionv3", num_classes=2048, use_gpu=True).cuda()
-        self.global_image_extract_net = get_network("inceptionv3", num_classes=num_categories, use_gpu=True).cuda()
+        self.image_bbox_extract_net = get_network("inceptionv3", num_classes=2048).cuda()
+        self.global_image_extract_net = get_network("inceptionv3", num_classes=num_categories).cuda()
         # X = torch.zeros((num_categories, num_categories), dtype=torch.float32)
         # self.X = nn.Parameter(X)
         X = np.zeros((num_categories, num_categories))
