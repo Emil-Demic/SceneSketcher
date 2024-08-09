@@ -2,7 +2,7 @@
 
 
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "5"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 import torch
 import scipy.spatial.distance as ssd
 from get_input import loadData

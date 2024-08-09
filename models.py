@@ -50,11 +50,11 @@ class GCNAttention(nn.Module):
         '''
 
         gcn_input = np.zeros((CATEGORY_NUMBERS,LOOP_NUM, 2052 ))
-        category_count = np.zeros(CATEGORY_NUMBERS,dtype=np.int)
+        category_count = np.zeros(CATEGORY_NUMBERS,dtype=np.int32)
         gcn_input = Variable(torch.from_numpy(gcn_input), requires_grad=False).type(torch.FloatTensor).cuda()
         # gcn_input = Variable(torch.from_numpy(gcn_input), requires_grad=False).type(torch.FloatTensor)
         for i in range(len(label_list)):
-            tmp_img = torch.from_numpy(np.transpose(np.array([image_list[i] / 255.0], np.float), [0, 3, 1, 2])).type(
+            tmp_img = torch.from_numpy(np.transpose(np.array([image_list[i] / 255.0], np.float32), [0, 3, 1, 2])).type(
                 torch.FloatTensor).cuda()
             # tmp_img = torch.from_numpy(np.transpose(np.array([image_list[i] / 255.0], np.float), [0, 3, 1, 2])).type(
             #     torch.FloatTensor)
@@ -62,14 +62,14 @@ class GCNAttention(nn.Module):
             if category_count[label_list[i] - 1] < LOOP_NUM:
 
                 gcn_input[label_list[i] - 1, category_count[label_list[i] - 1], :2048] += img_feature[0]
-                tmp_category = torch.from_numpy(np.array([category_list[i]], np.float)).type(torch.FloatTensor).cuda()
+                tmp_category = torch.from_numpy(np.array([category_list[i]], np.float32)).type(torch.FloatTensor).cuda()
                 # tmp_category = torch.from_numpy(np.array([category_list[i]], np.float)).type(torch.FloatTensor)
                 gcn_input[label_list[i] - 1, category_count[label_list[i] - 1], 2048:] = tmp_category
                 category_count[label_list[i] - 1] += 1
         gcn_input=torch.transpose(gcn_input,1,2)
         gcn_input=self.linear(gcn_input).squeeze()
 
-        total_image = torch.from_numpy(np.transpose(np.array([total_image / 255.0], np.float), [0, 3, 1, 2])).type(
+        total_image = torch.from_numpy(np.transpose(np.array([total_image / 255.0], np.float32), [0, 3, 1, 2])).type(
             torch.FloatTensor).cuda()
         # total_image = torch.from_numpy(np.transpose(np.array([total_image / 255.0], np.float), [0, 3, 1, 2])).type(
         #     torch.FloatTensor)
@@ -90,7 +90,7 @@ class GCNAttention(nn.Module):
     def get_image_feature(self, image):
         # image = torch.from_numpy(np.transpose(np.array([image / 255.0], np.float), [0, 3, 1, 2])).type(
         #     torch.FloatTensor).cuda()
-        image = torch.from_numpy(np.transpose(np.array([image / 255.0], np.float), [0, 3, 1, 2])).type(
+        image = torch.from_numpy(np.transpose(np.array([image / 255.0], np.float32), [0, 3, 1, 2])).type(
             torch.FloatTensor)
         return self.image_bbox_extract_net(image)
 
