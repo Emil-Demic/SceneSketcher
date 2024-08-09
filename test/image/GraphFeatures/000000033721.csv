@@ -1,0 +1,4 @@
+id,className,bboxleft,bboxtop,bboxright,bboxbottom
+0,1,100,125,252,330
+1,41,93,317,225,343
+2,1,0,284,10,310
