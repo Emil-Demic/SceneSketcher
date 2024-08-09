@@ -45,8 +45,7 @@ def loadData(vpath, imgpath):
         lines = f.readlines()
         for line in lines[1:]:
             features = list(map(float, line.strip().split(",")))
-            features = [round(x) for x in features]
-            bbox = features[2:]
+            bbox = [round(x) for x in features[2:]]
             if bbox[3] > img_height or bbox[2] > img_width:
                 continue
             if (bbox[3] - bbox[1]) < 32 or (bbox[2] - bbox[0]) < 32:
@@ -55,7 +54,7 @@ def loadData(vpath, imgpath):
             image_list.append(cv2.resize(bbox_img, (32, 32)))
             normalize_bbox = [bbox[0] / img_width, bbox[1] / img_height, bbox[2] / img_width, bbox[3] / img_height]
             bbox_list.append(normalize_bbox)
-            category = features[1] - 1
+            category = int(features[1]) - 1
             if category in category_dict.keys():
                 category_dict[category].append(normalize_bbox)
             else:
