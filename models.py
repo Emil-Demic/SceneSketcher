@@ -4,7 +4,6 @@
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
-# from torch.autograd import Variable
 
 from layers import GraphConvolution
 from utils_model import get_network
@@ -22,8 +21,6 @@ class GCNAttention(nn.Module):
         self.image_bbox_extract_net = get_network("inceptionv3", num_classes=2048).cuda()
         self.global_image_extract_net = get_network("inceptionv3", num_classes=num_categories).cuda()
         self.X = nn.Parameter(torch.zeros((num_categories, num_categories), dtype=torch.float32))
-        # X = np.zeros((num_categories, num_categories))
-        # self.X = nn.Parameter(torch.from_numpy(X.astype(np.float32)))
         self.linear = nn.Linear(LOOP_NUM, 1)
         nn.init.constant_(self.X, 1e-6)
         # -----------------GCN-----------------------------
@@ -38,8 +35,6 @@ class GCNAttention(nn.Module):
 
         gcn_input = torch.zeros((num_categories, LOOP_NUM, 2052), dtype=torch.float32, requires_grad=False).cuda()
         category_count = np.zeros(num_categories, dtype=np.int32)
-        # gcn_input = np.zeros((num_categories, LOOP_NUM, 2052))
-        # gcn_input = Variable(torch.from_numpy(gcn_input), requires_grad=False).type(torch.FloatTensor).cuda()
         for i in range(len(label_list)):
             tmp_img = torch.from_numpy(np.transpose(np.array([image_list[i] / 255.0], np.float32), [0, 3, 1, 2])).type(
                 torch.FloatTensor).cuda()
