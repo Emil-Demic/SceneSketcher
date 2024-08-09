@@ -60,7 +60,7 @@ def loadData(vpath, imgpath):
             else:
                 category_dict[category] = [normalize_bbox]
             corr[category, category] = 1
-            label_list.append(category)
+            label_list.append(category + 1)
 
     for i in range(num_categories):
         if corr[i, i] == 1:
