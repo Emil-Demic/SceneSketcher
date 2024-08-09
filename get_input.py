@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
-import sys
 import cv2
 import numpy as np
-import scipy.sparse as sp
-import torch
 from config import num_categories
 
 word2vec = []
@@ -36,7 +33,6 @@ def loadData(vpath, imgpath):
     img = cv2.imread(imgpath)
 
     img_height, img_width, channel = img.shape
-    features = []
     label_list = []
     image_list = []
     bbox_list = []
@@ -45,34 +41,26 @@ def loadData(vpath, imgpath):
     category_list = []
     corr = np.zeros((num_categories, num_categories))
     adj = np.zeros((num_categories, num_categories))
-    area_dict = {}
-    area_count = 0
     with open(vpath, 'r+') as f:
         lines = f.readlines()
-        for idx in range(len(lines)):
-            line = lines[idx]
-            if idx != 0:
-                fea = list(map(float, line.strip().split(",")))
-                bbox = [int(x) for x in list(map(float, line.strip().split(",")[2:]))]
-                # print(bbox)
-                if bbox[3] > img_height or bbox[2] > img_width:
-                    continue
-                if (bbox[3] - bbox[1]) < 32 or (bbox[2] - bbox[0]) < 32:
-                    continue
-                bbox_img = img[bbox[1]:bbox[3], bbox[0]:bbox[2], :]
-                area_dict[area_count] = ((bbox[3] - bbox[1]) * (bbox[2] - bbox[0]), int(fea[1]))
-                area_count += 1
-                # print(bbox_img.shape)
-                image_list.append(cv2.resize(bbox_img, (32, 32)))
-                normalize_bbox = [bbox[0] / img_width, bbox[1] / img_height, bbox[2] / img_width, bbox[3] / img_height]
-                bbox_list.append(normalize_bbox)
-                if int(fea[1]) - 1 in category_dict.keys():
-                    category_dict[int(fea[1]) - 1].append(normalize_bbox)
-                else:
-                    category_dict[int(fea[1]) - 1] = [normalize_bbox]
-                corr[int(fea[1]) - 1, int(fea[1]) - 1] = 1
-                label_list.append(int(fea[1]))
-                features.append(fea[:])
+        for line in lines[1:]:
+            featurs = list(map(round, line.strip().split(",")))
+            bbox = featurs[2:]
+            if bbox[3] > img_height or bbox[2] > img_width:
+                continue
+            if (bbox[3] - bbox[1]) < 32 or (bbox[2] - bbox[0]) < 32:
+                continue
+            bbox_img = img[bbox[1]:bbox[3], bbox[0]:bbox[2], :]
+            image_list.append(cv2.resize(bbox_img, (32, 32)))
+            normalize_bbox = [bbox[0] / img_width, bbox[1] / img_height, bbox[2] / img_width, bbox[3] / img_height]
+            bbox_list.append(normalize_bbox)
+            category = featurs[1] - 1
+            if category in category_dict.keys():
+                category_dict[category].append(normalize_bbox)
+            else:
+                category_dict[category] = [normalize_bbox]
+            corr[category, category] = 1
+            label_list.append(category)
 
     for i in range(num_categories):
         if corr[i, i] == 1:
@@ -95,13 +83,10 @@ def loadData(vpath, imgpath):
             if i in category_dict.keys() and j in category_dict.keys():
                 distance = euDistance(category_list[i], category_list[j])
                 distance = 1.0 - distance
-                # distance=1.0/distance
-                # print(distance)
 
                 adj[i, j] = distance
                 adj[j, i] = distance
 
     img = cv2.resize(img, (128, 128))
-    area_dict = sorted(area_dict.items(), key=lambda area_dict: area_dict[1][0], reverse=True)
 
-    return image_list, label_list, bbox_list, img, adj, corr, area_dict, category_list
+    return image_list, label_list, bbox_list, img, adj, corr, category_list
