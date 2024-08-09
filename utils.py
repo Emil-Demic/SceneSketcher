@@ -13,7 +13,7 @@ def loadDataDirectTest(mode, shuffleList, batchIndex):
 
         image_list, label_list, bbox_list, img, adj, corr = loadData(
             os.path.join(sketchVPathTest, str(batchIndex) + ".csv"),
-            os.path.join(sketchImgTestPath, str(batchIndex).zfill(12) + ".jpg"))
+            os.path.join(sketchImgTestPath, str(batchIndex).zfill(12) + ".png"))
     else:
         image_list, label_list, bbox_list, img, adj, corr = loadData(
             os.path.join(imageVPathTest, str(batchIndex) + ".csv"),
