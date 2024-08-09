@@ -11,19 +11,18 @@ def loadDataDirectTest(mode, shuffleList, batchIndex):
     batchIndex = shuffleList[batchIndex]
     if mode == "sketch":
 
-        image_list, label_list, bbox_list, img, adj, corr, category_list = loadData(
+        image_list, label_list, bbox_list, img, adj, corr = loadData(
             os.path.join(sketchVPathTest, str(batchIndex) + ".csv"),
-            # os.path.join(sketchImgTestPath, str(batchIndex).zfill(12) + ".jpg"))
-            os.path.join(sketchImgTestPath, str(batchIndex).zfill(12) + ".png"))
+            os.path.join(sketchImgTestPath, str(batchIndex).zfill(12) + ".jpg"))
     else:
-        image_list, label_list, bbox_list, img, adj, corr, category_list = loadData(
+        image_list, label_list, bbox_list, img, adj, corr = loadData(
             os.path.join(imageVPathTest, str(batchIndex) + ".csv"),
             os.path.join(imageImgTestPath, str(batchIndex).zfill(12) + ".jpg"))
 
     return image_list, label_list, bbox_list, img, adj, corr
 
 
-def outputHtml(sketchindex, indexList, mode="test"):
+def outputHtml(sketchindex, indexList):
     imageNameList = shuffleListTest
     sketchPath = sketchImgTestPath
     imgPath = imageImgTestPath

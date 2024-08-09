@@ -89,4 +89,4 @@ def loadData(vpath, imgpath):
 
     img = cv2.resize(img, (128, 128))
 
-    return image_list, label_list, bbox_list, img, adj, corr, category_list
+    return image_list, label_list, bbox_list, img, adj, corr
