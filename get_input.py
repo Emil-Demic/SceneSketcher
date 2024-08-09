@@ -27,6 +27,8 @@ def euDistance(x, y):
 
 def loadData(vpath, imgpath):
 
+    print(imgpath)
+
     assert os.path.exists(vpath)
     assert os.path.exists(imgpath)
 

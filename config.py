@@ -41,10 +41,10 @@ hardMode = False
 batch_size = 5
 # ------------------------------------sketch /Image Truly Image For display-------------------------
 
-imageImgPath = r"train/image/Image"
-imageImgTestPath=r"test/image/Image"
-sketchImgTrainPath = r"train/sketch/Image"
-sketchImgTestPath = r"test/sketch/Image"
+imageImgPath = "train/image/Image"
+imageImgTestPath = "test/image/Image"
+sketchImgTrainPath = "train/sketch/Image"
+sketchImgTestPath = "test/sketch/Image"
 
 # ------------------------------------sketch Features For train and test-------------------------
 sketchVPath = "train/sketch/GraphFeatures"
