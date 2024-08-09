@@ -4,6 +4,8 @@
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
+from torch.autograd import Variable
+
 from layers import GraphConvolution
 from utils_model import get_network
 import torch
@@ -19,8 +21,10 @@ class GCNAttention(nn.Module):
 
         self.image_bbox_extract_net = get_network("inceptionv3", num_classes=2048, use_gpu=True).cuda()
         self.global_image_extract_net = get_network("inceptionv3", num_classes=num_categories, use_gpu=True).cuda()
-        X = torch.zeros((num_categories, num_categories), dtype=torch.float32)
-        self.X = nn.Parameter(X)
+        # X = torch.zeros((num_categories, num_categories), dtype=torch.float32)
+        # self.X = nn.Parameter(X)
+        X = np.zeros((num_categories, num_categories))
+        self.X = nn.Parameter(torch.from_numpy(X.astype(np.float32)))
         self.linear = nn.Linear(LOOP_NUM, 1)
         nn.init.constant_(self.X, 1e-6)
         # -----------------GCN-----------------------------
@@ -33,21 +37,23 @@ class GCNAttention(nn.Module):
         category_list存类别对应的5维输入：bbox均值,个数
         '''
 
-        gcn_input = torch.zeros((num_categories, LOOP_NUM, 2052), dtype=torch.float32, requires_grad=False).cuda()
-        category_count = np.zeros(num_categories, dtype=int)
+        # gcn_input = torch.zeros((num_categories, LOOP_NUM, 2052), dtype=torch.float32, requires_grad=False).cuda()
+        category_count = np.zeros(num_categories, dtype=np.int32)
+        gcn_input = np.zeros((num_categories, LOOP_NUM, 2052))
+        gcn_input = Variable(torch.from_numpy(gcn_input), requires_grad=False).type(torch.FloatTensor).cuda()
         for i in range(len(label_list)):
-            tmp_img = torch.from_numpy(np.transpose(np.array([image_list[i] / 255.0], float), [0, 3, 1, 2])).type(
+            tmp_img = torch.from_numpy(np.transpose(np.array([image_list[i] / 255.0], np.float32), [0, 3, 1, 2])).type(
                 torch.FloatTensor).cuda()
             img_feature = self.image_bbox_extract_net(tmp_img)
             if category_count[label_list[i] - 1] < LOOP_NUM:
                 gcn_input[label_list[i] - 1, category_count[label_list[i] - 1], :2048] += img_feature[0]
-                tmp_category = torch.from_numpy(np.array([category_list[i]], float)).type(torch.FloatTensor).cuda()
+                tmp_category = torch.from_numpy(np.array([category_list[i]], np.float32)).type(torch.FloatTensor).cuda()
                 gcn_input[label_list[i] - 1, category_count[label_list[i] - 1], 2048:] = tmp_category
                 category_count[label_list[i] - 1] += 1
         gcn_input = torch.transpose(gcn_input, 1, 2)
         gcn_input = self.linear(gcn_input).squeeze()
 
-        total_image = torch.from_numpy(np.transpose(np.array([total_image / 255.0], float), [0, 3, 1, 2])).type(
+        total_image = torch.from_numpy(np.transpose(np.array([total_image / 255.0], np.float32), [0, 3, 1, 2])).type(
             torch.FloatTensor).cuda()
         global_attention = self.global_image_extract_net(total_image)
 
@@ -63,7 +69,7 @@ class GCNAttention(nn.Module):
         return result_feature
 
     def get_image_feature(self, image):
-        image = torch.from_numpy(np.transpose(np.array([image / 255.0], float), [0, 3, 1, 2])).type(
+        image = torch.from_numpy(np.transpose(np.array([image / 255.0], np.float32), [0, 3, 1, 2])).type(
             torch.FloatTensor)
         return self.image_bbox_extract_net(image)
 
