@@ -28,11 +28,11 @@ def loadDataDirect(shuffleList, batchIndex):
             '''
     batchIndex = shuffleList[batchIndex]
     image_list_arc, label_list_arc, bbox_list_arc, total_image_arc, adj_arc, corr_arc = loadData(
-        os.path.join(sketchVPath, str(batchIndex) + ".csv").zfill(12),
+        os.path.join(sketchVPath, str(batchIndex).zfill(12) + ".csv"),
         os.path.join(sketchImgTrainPath, str(batchIndex).zfill(12) + ".jpg"))
 
     image_list_pos, label_list_pos, bbox_list_pos, total_image_pos, adj_pos, corr_pos = loadData(
-        os.path.join(imageVPath, str(batchIndex) + ".csv").zfill(12),
+        os.path.join(imageVPath, str(batchIndex).zfill(12) + ".csv"),
         os.path.join(imageImgPath, str(batchIndex).zfill(12) + ".jpg"))
 
     shuffleNum = batchIndex
@@ -40,7 +40,7 @@ def loadDataDirect(shuffleList, batchIndex):
         shuffleNum = shuffleList[random.randint(0, len(shuffleList) - 1)]
 
     image_list_neg, label_list_neg, bbox_list_neg, total_image_neg, adj_neg, corr_neg = loadData(
-        os.path.join(imageVPath, str(shuffleNum) + ".csv").zfill(12),
+        os.path.join(imageVPath, str(shuffleNum).zfill(12) + ".csv"),
         os.path.join(imageImgPath, str(shuffleNum).zfill(12) + ".jpg"))
 
     return image_list_arc, label_list_arc, bbox_list_arc, total_image_arc, adj_arc, corr_arc, image_list_pos, label_list_pos, bbox_list_pos, total_image_pos, adj_pos, corr_pos, image_list_neg, label_list_neg, bbox_list_neg, total_image_neg, adj_neg, corr_neg
