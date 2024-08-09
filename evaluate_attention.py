@@ -16,15 +16,15 @@ def loadDataDirectTest(mode, shuffleList, batchIndex):
     batchIndex = shuffleList[batchIndex]
     if mode == "sketch":
 
-        image_list, label_list, bbox_list, img, adj, corr, area_dict, category_list = loadData(
+        image_list, label_list, bbox_list, img, adj, corr, category_list = loadData(
             os.path.join(sketchVPathTest, str(batchIndex) + ".csv"),
             os.path.join(sketchImgTestPath, str(batchIndex).zfill(12) + ".jpg"))
     else:
-        image_list, label_list, bbox_list, img, adj, corr, area_dict, category_list = loadData(
+        image_list, label_list, bbox_list, img, adj, corr, category_list = loadData(
             os.path.join(imageVPathTest, str(batchIndex) + ".csv"),
             os.path.join(imageImgTestPath, str(batchIndex).zfill(12) + ".jpg"))
 
-    return image_list, label_list, bbox_list, img, adj, corr, area_dict, category_list
+    return image_list, label_list, bbox_list, img, adj, corr
 
 
 def compute_view_specific_distance(sketch_feats, image_feats):
@@ -113,7 +113,7 @@ for i in os.listdir("model"):
     with torch.no_grad():
 
         for batchIndex in tqdm.tqdm(range(batchesTest)):
-            image_list, label_list, bbox_list, img, adj, corr, area_dict, category_list = loadDataDirectTest("sketch",
+            image_list, label_list, bbox_list, img, adj, corr = loadDataDirectTest("sketch",
                                                                                                              shuffleListTest,
                                                                                                              batchIndex)
             a = model.get_embedding(image_list, label_list, bbox_list, img, adj, corr)
@@ -122,7 +122,7 @@ for i in os.listdir("model"):
         aList = np.array(aList)
 
         for batchIndex in tqdm.tqdm(range(batchesTest)):
-            image_list, label_list, bbox_list, img, adj, corr, area_dict, category_list = loadDataDirectTest("image",
+            image_list, label_list, bbox_list, img, adj, corr = loadDataDirectTest("image",
                                                                                                              shuffleListTest,
                                                                                                              batchIndex)
             p = model.get_embedding(image_list, label_list, bbox_list, img, adj, corr)
