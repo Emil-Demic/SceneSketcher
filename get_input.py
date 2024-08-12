@@ -101,7 +101,7 @@ def loadData(vpath, imgpath):
 
     img = to_float(resize_global(img))
 
-    if len(image_list > 1):
+    if len(image_list) > 1:
         image_list = torch.stack(image_list)
     else:
         image_list = torch.tensor(image_list)
