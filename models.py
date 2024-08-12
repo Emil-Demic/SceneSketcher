@@ -85,7 +85,8 @@ class TripletAttentionNet(nn.Module):
                                         corr_arc)
         return output_arc, output_pos, output_neg
 
-    def get_embedding(self, image_list, label_list, category_list, total_image, adj, corr):
+    def get_embedding(self, batch):
+        image_list, label_list, category_list, total_image, adj, corr = batch
         return self.embedding_net(image_list, label_list, category_list, total_image, adj, corr)
 
     def get_image_feature(self, image):
