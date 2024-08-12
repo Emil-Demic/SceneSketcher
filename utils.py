@@ -1,25 +1,12 @@
 import scipy.spatial.distance as ssd
+from torch.utils.data import Dataset
+
 from config import *
 from get_input import loadData
 
 
 def compute_view_specific_distance(sketch_feats, image_feats):
     return ssd.cdist(sketch_feats, image_feats, 'sqeuclidean')
-
-
-def loadDataDirectTest(mode, shuffleList, batchIndex):
-    batchIndex = shuffleList[batchIndex]
-    if mode == "sketch":
-
-        image_list, label_list, bbox_list, img, adj, corr = loadData(
-            os.path.join(sketchVPathTest, str(batchIndex) + ".csv"),
-            os.path.join(sketchImgTestPath, str(batchIndex).zfill(12) + ".png"))
-    else:
-        image_list, label_list, bbox_list, img, adj, corr = loadData(
-            os.path.join(imageVPathTest, str(batchIndex) + ".csv"),
-            os.path.join(imageImgTestPath, str(batchIndex).zfill(12) + ".jpg"))
-
-    return image_list, label_list, bbox_list, img, adj, corr
 
 
 def outputHtml(sketchindex, indexList):
@@ -75,3 +62,56 @@ def calculate_accuracy(dist, epoch_name):
     with open(r"html_result/result.html", 'w+') as f:
         f.write(htmlContent)
     return top1, top5, top10, top20
+
+
+def loadDataDirectTest(mode, shuffleList, batchIndex):
+    batchIndex = shuffleList[batchIndex]
+    if mode == "sketch":
+
+        image_list, label_list, bbox_list, img, adj, corr = loadData(
+            os.path.join(sketchVPathTest, str(batchIndex) + ".csv"),
+            os.path.join(sketchImgTestPath, str(batchIndex).zfill(12) + ".png"))
+    else:
+        image_list, label_list, bbox_list, img, adj, corr = loadData(
+            os.path.join(imageVPathTest, str(batchIndex) + ".csv"),
+            os.path.join(imageImgTestPath, str(batchIndex).zfill(12) + ".jpg"))
+
+    return image_list, label_list, bbox_list, img, adj, corr
+
+
+class datasetTestSketch(Dataset):
+    def __init__(self, sketchImgTestPath, sketchVPathTest, shuffleList):
+        self.sketchImgTestPath = sketchImgTestPath
+        self.sketchVPathTest = sketchVPathTest
+        self.shuffleList = shuffleList
+
+    def __getitem__(self, index):
+        batchIndex = self.shuffleList[index]
+        image_list, label_list, bbox_list, img, adj, corr = loadData(
+            os.path.join(sketchVPathTest, str(batchIndex) + ".csv"),
+            os.path.join(sketchImgTestPath, str(batchIndex).zfill(12) + ".png"))
+
+        return image_list, label_list, bbox_list, img, adj, corr
+
+    def __len__(self):
+        return len(self.shuffleList)
+
+
+class datasetTestImage(Dataset):
+    def __init__(self, imageImgTestPath, imageVPathTest, shuffleList):
+        self.imageImgTestPath = imageImgTestPath
+        self.imageVPathTest = imageVPathTest
+        self.shuffleList = shuffleList
+
+    def __getitem__(self, index):
+        batchIndex = self.shuffleList[index]
+        image_list, label_list, bbox_list, img, adj, corr = loadData(
+            os.path.join(imageVPathTest, str(batchIndex) + ".csv"),
+            os.path.join(imageImgTestPath, str(batchIndex).zfill(12) + ".png"))
+
+        return image_list, label_list, bbox_list, img, adj, corr
+
+    def __len__(self):
+        return len(self.shuffleList)
+
+
