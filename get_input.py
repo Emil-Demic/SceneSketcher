@@ -101,7 +101,10 @@ def loadData(vpath, imgpath):
 
     img = to_float(resize_global(img))
 
-    image_list = torch.stack(image_list)
+    if len(image_list > 1):
+        image_list = torch.stack(image_list)
+    else:
+        image_list = torch.tensor(image_list)
     label_list = torch.tensor(label_list)
     bbox_list = torch.tensor(bbox_list, dtype=torch.float32)
     # bbox_list = BoundingBoxes(bbox_list, format="XYXY", canvas_size=(img_height, img_width))
