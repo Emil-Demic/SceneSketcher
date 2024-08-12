@@ -50,7 +50,7 @@ for i in os.listdir("model"):
             #                                                                        shuffleListTest,
             #                                                                        batchIndex)
             print(len(batch))
-            print(batch.shape)
+            print(batch)
             a = model.get_embedding(batch)
             print(a)
             aList.append(a.cpu().numpy()[0])

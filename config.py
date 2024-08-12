@@ -38,7 +38,7 @@ epochs = 20
 
 outPutDim = 256
 hardMode = False
-batch_size = 5
+batch_size = 1
 # ------------------------------------sketch /Image Truly Image For display-------------------------
 
 imageImgPath = "train/image/Image"
