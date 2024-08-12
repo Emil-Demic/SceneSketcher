@@ -51,7 +51,7 @@ for i in os.listdir("model"):
             #                                                                        batchIndex)
             print(len(batch))
             print(batch)
-            a = model.get_embedding(batch)
+            a = model.get_embedding(*batch)
             print(a)
             aList.append(a.cpu().numpy()[0])
 
