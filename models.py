@@ -4,23 +4,20 @@
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
-from torch import numel
 
 from layers import GraphConvolution
 from utils_model import get_network
 import torch
 from config import num_categories
-import matplotlib.pyplot as plt
 
 LOOP_NUM = 3
-
 
 class GCNAttention(nn.Module):
     def __init__(self, gcn_input_shape, gcn_output_shape):
         super(GCNAttention, self).__init__()
 
-        self.image_bbox_extract_net = get_network("inceptionv3", num_classes=2048).cuda()
-        self.global_image_extract_net = get_network("inceptionv3", num_classes=num_categories).cuda()
+        self.image_bbox_extract_net = get_network("inceptionv3", num_classes=2048)
+        self.global_image_extract_net = get_network("inceptionv3", num_classes=num_categories)
         self.X = nn.Parameter(torch.zeros((num_categories, num_categories), dtype=torch.float32))
         self.linear = nn.Linear(LOOP_NUM, 1)
         nn.init.constant_(self.X, 1e-6)
@@ -34,27 +31,28 @@ class GCNAttention(nn.Module):
         category_list存类别对应的5维输入：bbox均值,个数
         '''
         label_list = label_list[0]
-        gcn_input = torch.zeros((num_categories, LOOP_NUM, 2052), dtype=torch.float32, requires_grad=False).cuda()
-        img_features = self.image_bbox_extract_net(image_list[0])
-        if (numel(img_features) == 0):
-            print("error")
-        full_features = torch.hstack((img_features, category_list[0])).cuda()
-        category_count = np.zeros(num_categories, dtype=np.int32)
-        for i, tmp_feature in enumerate(full_features):
-            # plt.imshow(image_list[0][i].permute(1,2,0))
-            # plt.show()
-            # tmp_img = torch.from_numpy(np.transpose(np.array([image_list[0][i] / 255.0], np.float32), [0, 3, 1, 2])).type(
-            #     torch.FloatTensor)
-            # plt.imshow(tmp_img[0].permute(1, 2, 0))
-            # plt.show()
+        gcn_input = torch.zeros((num_categories, LOOP_NUM, 2052), dtype=torch.float32, requires_grad=False)
+        if len(label_list[0]) > 0:
+            img_features = self.image_bbox_extract_net(image_list[0])
+            print(img_features.shape)
+            print(category_list[0].shape)
+            full_features = torch.hstack((img_features, category_list[0]))
+            category_count = np.zeros(num_categories, dtype=np.int32)
+            for i, tmp_feature in enumerate(full_features):
+                # plt.imshow(image_list[0][i].permute(1,2,0))
+                # plt.show()
+                # tmp_img = torch.from_numpy(np.transpose(np.array([image_list[0][i] / 255.0], np.float32), [0, 3, 1, 2])).type(
+                #     torch.FloatTensor)
+                # plt.imshow(tmp_img[0].permute(1, 2, 0))
+                # plt.show()
 
-            # if category_count[label_list[i] - 1] < LOOP_NUM:
-                # gcn_input[label_list[i] - 1, category_count[label_list[i] - 1], :2048] += img_feature[0]
-                # tmp_category = torch.from_numpy(np.array([category_list[i]], np.float32)).type(torch.FloatTensor)
-                gcn_input[label_list[i] - 1, category_count[label_list[i] - 1], :] = tmp_feature
-                category_count[label_list[i] - 1] += 1
-        gcn_input = torch.transpose(gcn_input, 1, 2)
-        gcn_input = self.linear(gcn_input).squeeze()
+                # if category_count[label_list[i] - 1] < LOOP_NUM:
+                    # gcn_input[label_list[i] - 1, category_count[label_list[i] - 1], :2048] += img_feature[0]
+                    # tmp_category = torch.from_numpy(np.array([category_list[i]], np.float32)).type(torch.FloatTensor)
+                    gcn_input[label_list[i] - 1, category_count[label_list[i] - 1], :] = tmp_feature
+                    category_count[label_list[i] - 1] += 1
+            gcn_input = torch.transpose(gcn_input, 1, 2)
+            gcn_input = self.linear(gcn_input).squeeze()
 
         # total_image = torch.from_numpy(np.transpose(np.array([total_image / 255.0], np.float32), [0, 3, 1, 2])).type(
         #     torch.FloatTensor)
@@ -63,7 +61,7 @@ class GCNAttention(nn.Module):
         # corr = torch.from_numpy(corr).type(torch.FloatTensor)
         # adj = torch.from_numpy(adj).type(torch.FloatTensor)
 
-        new_adj = self.X.cuda() + adj[0].cuda() + corr[0].cuda()
+        new_adj = self.X + adj[0] + corr[0]
 
         gcn_output = F.leaky_relu(self.gc1(gcn_input, new_adj))
 
@@ -95,7 +93,7 @@ class TripletAttentionNet(nn.Module):
         return output_arc, output_pos, output_neg
 
     def get_embedding(self, image_list, label_list, category_list, total_image, adj, corr):
-        return self.embedding_net(image_list.cuda(), label_list.cuda(), category_list.cuda(), total_image.cuda(), adj.cuda(), corr.cuda())
+        return self.embedding_net(image_list, label_list, category_list, total_image, adj, corr)
 
     def get_image_feature(self, image):
         return self.embedding_net.get_image_feature(image)
