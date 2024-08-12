@@ -35,6 +35,8 @@ class GCNAttention(nn.Module):
         label_list = label_list[0]
         gcn_input = torch.zeros((num_categories, LOOP_NUM, 2052), dtype=torch.float32, requires_grad=False).cuda()
         img_features = self.image_bbox_extract_net(image_list[0])
+        print(img_features.shape)
+        print(category_list[0].shape)
         full_features = torch.hstack((img_features, category_list[0])).cuda()
         category_count = np.zeros(num_categories, dtype=np.int32)
         for i, tmp_feature in enumerate(full_features):
