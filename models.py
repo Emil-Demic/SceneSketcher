@@ -20,11 +20,11 @@ class GCNAttention(nn.Module):
 
         self.image_bbox_extract_net = get_network("inceptionv3", num_classes=2048).cuda()
         self.global_image_extract_net = get_network("inceptionv3", num_classes=num_categories).cuda()
-        self.X = nn.Parameter(torch.zeros((num_categories, num_categories), dtype=torch.float32)).cuda()
-        self.linear = nn.Linear(LOOP_NUM, 1).cuda()
+        self.X = nn.Parameter(torch.zeros((num_categories, num_categories), dtype=torch.float32))
+        self.linear = nn.Linear(LOOP_NUM, 1)
         nn.init.constant_(self.X, 1e-6)
         # -----------------GCN-----------------------------
-        self.gc1 = GraphConvolution(gcn_input_shape, gcn_output_shape).cuda()
+        self.gc1 = GraphConvolution(gcn_input_shape, gcn_output_shape)
 
     def forward(self, image_list, label_list, category_list, total_image, adj, corr):
         '''
@@ -33,9 +33,9 @@ class GCNAttention(nn.Module):
         category_list存类别对应的5维输入：bbox均值,个数
         '''
         label_list = label_list[0]
-        gcn_input = torch.zeros((num_categories, LOOP_NUM, 2052), dtype=torch.float32, requires_grad=False)
+        gcn_input = torch.zeros((num_categories, LOOP_NUM, 2052), dtype=torch.float32, requires_grad=False).cuda()
         img_features = self.image_bbox_extract_net(image_list[0])
-        full_features = torch.hstack((img_features, category_list[0]))
+        full_features = torch.hstack((img_features, category_list[0])).cuda()
         category_count = np.zeros(num_categories, dtype=np.int32)
         for i, tmp_feature in enumerate(full_features):
             # plt.imshow(image_list[0][i].permute(1,2,0))
@@ -60,7 +60,7 @@ class GCNAttention(nn.Module):
         # corr = torch.from_numpy(corr).type(torch.FloatTensor)
         # adj = torch.from_numpy(adj).type(torch.FloatTensor)
 
-        new_adj = self.X + adj[0] + corr[0]
+        new_adj = self.X.cuda() + adj[0].cuda() + corr[0].cuda()
 
         gcn_output = F.leaky_relu(self.gc1(gcn_input, new_adj))
 
