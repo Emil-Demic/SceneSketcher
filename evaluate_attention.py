@@ -49,7 +49,9 @@ for i in os.listdir("model"):
             # image_list, label_list, bbox_list, img, adj, corr = loadDataDirectTest("sketch",
             #                                                                        shuffleListTest,
             #                                                                        batchIndex)
+            print(batch)
             a = model.get_embedding(batch)
+            print(a)
             aList.append(a.cpu().numpy()[0])
 
         aList = np.array(aList)
