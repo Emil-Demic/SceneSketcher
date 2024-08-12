@@ -92,8 +92,7 @@ class datasetTestSketch(Dataset):
             os.path.join(sketchVPathTest, str(batchIndex) + ".csv"),
             os.path.join(sketchImgTestPath, str(batchIndex).zfill(12) + ".png"))
 
-        return (torch.tensor(image_list), torch.tensor(label_list), torch.tensor(bbox_list), torch.tensor(img),
-                torch.tensor(adj), torch.tensor(corr))
+        return image_list, label_list, bbox_list, img, adj, corr
 
     def __len__(self):
         return len(self.shuffleList)
@@ -111,8 +110,7 @@ class datasetTestImage(Dataset):
             os.path.join(imageVPathTest, str(batchIndex) + ".csv"),
             os.path.join(imageImgTestPath, str(batchIndex).zfill(12) + ".png"))
 
-        return (torch.tensor(image_list), torch.tensor(label_list), torch.tensor(bbox_list), torch.tensor(img),
-                torch.tensor(adj), torch.tensor(corr))
+        return image_list, label_list, bbox_list, img, adj, corr
 
     def __len__(self):
         return len(self.shuffleList)

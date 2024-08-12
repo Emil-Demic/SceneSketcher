@@ -65,8 +65,8 @@ shuffleListTest = [int(x.split(".")[0]) for x in shuffleListTest]
 
 print(shuffleListTest)
 
-shuffleList = os.listdir(sketchVPath)
-batches = len(shuffleList)
-shuffleList = [int(x.split(".")[0]) for x in shuffleList]
-
-print(shuffleList)
+# shuffleList = os.listdir(sketchVPath)
+# batches = len(shuffleList)
+# shuffleList = [int(x.split(".")[0]) for x in shuffleList]
+#
+# print(shuffleList)

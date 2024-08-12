@@ -24,8 +24,9 @@ model = TripletAttentionNet(embedding_net)
 if args.cuda:
     model.cuda()
 
-dataset_sketch = datasetTestSketch(sketchImgTestPath, sketchVPathTest, shuffleList)
-dataset_image = datasetTestImage(imageImgTestPath, imageVPathTest, shuffleList)
+
+dataset_sketch = datasetTestSketch(sketchImgTestPath, sketchVPathTest, shuffleListTest)
+dataset_image = datasetTestImage(imageImgTestPath, imageVPathTest, shuffleListTest)
 
 dataloader_sketch = DataLoader(dataset_sketch, batch_size=batch_size, shuffle=False)
 dataloader_image = DataLoader(dataset_image, batch_size=batch_size, shuffle=False)
