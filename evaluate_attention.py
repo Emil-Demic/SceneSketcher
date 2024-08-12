@@ -18,6 +18,7 @@ np.random.seed(args.seed)
 torch.manual_seed(args.seed)
 if args.cuda:
     torch.cuda.manual_seed(args.seed)
+
 embedding_net = GCNAttention(gcn_input_shape=featureDim, gcn_output_shape=outPutDim)
 
 model = TripletAttentionNet(embedding_net)
@@ -37,7 +38,7 @@ for i in os.listdir("model"):
         continue
 
     print(os.path.join("model", i))
-    model.load_state_dict(torch.load(os.path.join("model", i)))
+    model.load_state_dict(torch.load(os.path.join("model", i), map_location=torch.device('cpu')))
     model.eval()
     epoch_name = "Epoch " + str(i)
 
@@ -46,14 +47,15 @@ for i in os.listdir("model"):
 
     with torch.no_grad():
 
-        for batch in dataloader_sketch:
+        for batch in tqdm.tqdm(dataloader_sketch):
+            if args.cuda:
+                batch = batch.cuda()
             # image_list, label_list, bbox_list, img, adj, corr = loadDataDirectTest("sketch",
             #                                                                        shuffleListTest,
             #                                                                        batchIndex)
-            print(len(batch))
-            print(batch)
+            # print(len(batch))
+            # print(batch)
             a = model.get_embedding(*batch)
-            print(a)
             aList.append(a.cpu().numpy()[0])
 
         aList = np.array(aList)
@@ -62,7 +64,7 @@ for i in os.listdir("model"):
             # image_list, label_list, bbox_list, img, adj, corr = loadDataDirectTest("image",
             #                                                                        shuffleListTest,
             #                                                                        batchIndex)
-            p = model.get_embedding(batch)
+            p = model.get_embedding(*batch)
             pList.append(p.cpu().numpy()[0])
 
         pList = np.array(pList)

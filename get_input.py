@@ -2,6 +2,11 @@
 import os
 import cv2
 import numpy as np
+import torch
+from torchvision.io import read_image
+from torchvision.transforms.v2 import Resize, ToDtype
+from torchvision.tv_tensors import BoundingBoxes, Image
+
 from config import num_categories
 
 word2vec = []
@@ -26,41 +31,48 @@ def euDistance(x, y):
 
 
 def loadData(vpath, imgpath):
-
     assert os.path.exists(vpath)
     assert os.path.exists(imgpath)
 
-    img = cv2.imread(imgpath)
+    to_float = ToDtype(torch.float32, scale=True)
+    img = Image(read_image(imgpath))
+    resize_BB = Resize((32, 32))
+    resize_global = Resize((128, 128))
 
-    img_height, img_width, channel = img.shape
+    channel, img_height, img_width = img.shape
     label_list = []
     image_list = []
     bbox_list = []
     category_dict = {}
 
     category_list = []
-    corr = np.zeros((num_categories, num_categories))
-    adj = np.zeros((num_categories, num_categories))
+    corr = torch.zeros((num_categories, num_categories))
+    adj = torch.zeros((num_categories, num_categories))
+    category_count = np.zeros(num_categories, dtype=np.int8)
     with open(vpath, 'r+') as f:
         lines = f.readlines()
         for line in lines[1:]:
             features = list(map(float, line.strip().split(",")))
+            category = int(features[1]) - 1
+            if category_count[category] == 3:
+                continue
             bbox = [round(x) for x in features[2:]]
             if bbox[3] > img_height or bbox[2] > img_width:
                 continue
             if (bbox[3] - bbox[1]) < 32 or (bbox[2] - bbox[0]) < 32:
                 continue
-            bbox_img = img[bbox[1]:bbox[3], bbox[0]:bbox[2], :]
-            image_list.append(cv2.resize(bbox_img, (32, 32)))
+            bbox_img = Image(img[:, bbox[1]:bbox[3], bbox[0]:bbox[2]])
+            image_list.append(to_float(resize_BB(bbox_img)))
             normalize_bbox = [bbox[0] / img_width, bbox[1] / img_height, bbox[2] / img_width, bbox[3] / img_height]
             bbox_list.append(normalize_bbox)
-            category = int(features[1]) - 1
+
             if category in category_dict.keys():
                 category_dict[category].append(normalize_bbox)
             else:
                 category_dict[category] = [normalize_bbox]
             corr[category, category] = 1
             label_list.append(category + 1)
+            category_count[category] += 1
 
     for i in range(num_categories):
         if corr[i, i] == 1:
@@ -87,6 +99,11 @@ def loadData(vpath, imgpath):
                 adj[i, j] = distance
                 adj[j, i] = distance
 
-    img = cv2.resize(img, (128, 128))
+    img = to_float(resize_global(img))
+
+    image_list = torch.stack(image_list)
+    label_list = torch.tensor(label_list)
+    bbox_list = torch.tensor(bbox_list, dtype=torch.float32)
+    # bbox_list = BoundingBoxes(bbox_list, format="XYXY", canvas_size=(img_height, img_width))
 
     return image_list, label_list, bbox_list, img, adj, corr
