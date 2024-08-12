@@ -31,9 +31,10 @@ class GCNAttention(nn.Module):
         label_list存根据bbox截取好的图像类别标签
         category_list存类别对应的5维输入：bbox均值,个数
         '''
+        print(label_list.shape)
         label_list = label_list[0]
         gcn_input = torch.zeros((num_categories, LOOP_NUM, 2052), dtype=torch.float32, requires_grad=False).cuda()
-        if len(label_list[0].size()) > 0:
+        if numel(label_list[0]) > 0:
             img_features = self.image_bbox_extract_net(image_list[0])
             # print(img_features.shape)
             # print(category_list[0].shape)
