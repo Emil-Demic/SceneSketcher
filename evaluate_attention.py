@@ -32,10 +32,6 @@ dataset_image = datasetTestImage(imageImgTestPath, imageVPathTest, shuffleListTe
 dataloader_sketch = DataLoader(dataset_sketch, batch_size=batch_size, shuffle=False)
 dataloader_image = DataLoader(dataset_image, batch_size=batch_size, shuffle=False)
 
-if args.cuda:
-    dataloader_sketch = dataloader_sketch.cuda()
-    dataloader_image = dataloader_image.cuda()
-    
 
 MaxEpoch = 'epoch1'
 for i in os.listdir("model"):
@@ -53,6 +49,9 @@ for i in os.listdir("model"):
     with torch.no_grad():
 
         for batch in tqdm.tqdm(dataloader_sketch):
+            if args.cuda:
+                for item in batch:
+                    item.cuda()
             # image_list, label_list, bbox_list, img, adj, corr = loadDataDirectTest("sketch",
             #                                                                        shuffleListTest,
             #                                                                        batchIndex)
