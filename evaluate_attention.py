@@ -49,9 +49,6 @@ for i in os.listdir("model"):
     with torch.no_grad():
 
         for batch in tqdm.tqdm(dataloader_sketch):
-            if args.cuda:
-                for item in batch:
-                    item.cuda()
             # image_list, label_list, bbox_list, img, adj, corr = loadDataDirectTest("sketch",
             #                                                                        shuffleListTest,
             #                                                                        batchIndex)
