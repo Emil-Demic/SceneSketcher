@@ -20,11 +20,11 @@ class GCNAttention(nn.Module):
 
         self.image_bbox_extract_net = get_network("inceptionv3", num_classes=2048).cuda()
         self.global_image_extract_net = get_network("inceptionv3", num_classes=num_categories).cuda()
-        self.X = nn.Parameter(torch.zeros((num_categories, num_categories), dtype=torch.float32))
-        self.linear = nn.Linear(LOOP_NUM, 1)
+        self.X = nn.Parameter(torch.zeros((num_categories, num_categories), dtype=torch.float32)).cuda()
+        self.linear = nn.Linear(LOOP_NUM, 1).cuda()
         nn.init.constant_(self.X, 1e-6)
         # -----------------GCN-----------------------------
-        self.gc1 = GraphConvolution(gcn_input_shape, gcn_output_shape)
+        self.gc1 = GraphConvolution(gcn_input_shape, gcn_output_shape).cuda()
 
     def forward(self, image_list, label_list, category_list, total_image, adj, corr):
         '''
