@@ -108,7 +108,7 @@ class datasetTestImage(Dataset):
         batchIndex = self.shuffleList[index]
         image_list, label_list, bbox_list, img, adj, corr = loadData(
             os.path.join(imageVPathTest, str(batchIndex) + ".csv"),
-            os.path.join(imageImgTestPath, str(batchIndex).zfill(12) + ".png"))
+            os.path.join(imageImgTestPath, str(batchIndex).zfill(12) + ".jpg"))
 
         return image_list, label_list, bbox_list, img, adj, corr
 
