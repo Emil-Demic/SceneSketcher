@@ -34,6 +34,10 @@ def loadData(vpath, imgpath):
     assert os.path.exists(vpath)
     assert os.path.exists(imgpath)
 
+    if "6936" in str(vpath):
+        bla = 5
+
+
     to_float = ToDtype(torch.float32, scale=True)
     img = Image(read_image(imgpath))
     resize_BB = Resize((32, 32))

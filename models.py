@@ -37,7 +37,7 @@ class GCNAttention(nn.Module):
             img_features = self.image_bbox_extract_net(image_list[0])
             # print(img_features.shape)
             # print(category_list[0].shape)
-            full_features = torch.hstack((img_features, category_list[0])).cuda()
+            full_features = torch.hstack((img_features, category_list[0]))
             category_count = np.zeros(num_categories, dtype=np.int32)
             for i, tmp_feature in enumerate(full_features):
                 # plt.imshow(image_list[0][i].permute(1,2,0))
@@ -52,8 +52,8 @@ class GCNAttention(nn.Module):
                     # tmp_category = torch.from_numpy(np.array([category_list[i]], np.float32)).type(torch.FloatTensor)
                     gcn_input[label_list[i] - 1, category_count[label_list[i] - 1], :] = tmp_feature
                     category_count[label_list[i] - 1] += 1
-            gcn_input = torch.transpose(gcn_input, 1, 2)
-            gcn_input = self.linear(gcn_input).squeeze()
+        gcn_input = torch.transpose(gcn_input, 1, 2)
+        gcn_input = self.linear(gcn_input).squeeze()
 
         # total_image = torch.from_numpy(np.transpose(np.array([total_image / 255.0], np.float32), [0, 3, 1, 2])).type(
         #     torch.FloatTensor)
