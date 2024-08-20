@@ -14,6 +14,8 @@ parser.add_argument('--fastmode', action='store_true', default=False,
 parser.add_argument('--seed', type=int, default=42, help='Random seed.')
 parser.add_argument('--epochs', type=int, default=200,
                     help='Number of epochs to train.')
+parser.add_argument('--batch_size', type=int, default=5,
+                    help='Batch size.')
 parser.add_argument('--lr', type=float, default=0.0001,
                     help='Initial learning rate.')
 parser.add_argument('--weight_decay', type=float, default=5e-4,
@@ -38,24 +40,22 @@ epochs = 20
 
 outPutDim = 256
 hardMode = False
-batch_size = 1
+# batch_size = 10
 # ------------------------------------sketch /Image Truly Image For display-------------------------
 
 imageImgPath = "train/image/Image"
 imageImgTestPath = "test/image/Image"
-sketchImgTrainPath = "train/sketch/Image"
+sketchImgPath = "train/sketch/Image"
 sketchImgTestPath = "test/sketch/Image"
 
 # ------------------------------------sketch Features For train and test-------------------------
 sketchVPath = "train/sketch/GraphFeatures"
-
 sketchVPathTest = "test/sketch/GraphFeatures"
 
 
 # ------------------------------------image Features For train and test-------------------------
 
 imageVPath = "train/image/GraphFeatures"
-
 imageVPathTest = "test/image/GraphFeatures"
 
 
@@ -65,8 +65,8 @@ shuffleListTest = [int(x.split(".")[0]) for x in shuffleListTest]
 
 print(shuffleListTest)
 
-# shuffleList = os.listdir(sketchVPath)
-# batches = len(shuffleList)
-# shuffleList = [int(x.split(".")[0]) for x in shuffleList]
-#
-# print(shuffleList)
+shuffleList = os.listdir(sketchVPath)
+batches = len(shuffleList)
+shuffleList = [int(x.split(".")[0]) for x in shuffleList]
+
+print(shuffleList)

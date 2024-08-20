@@ -1,6 +1,7 @@
 import scipy.spatial.distance as ssd
 import torch
-from torch.utils.data import Dataset
+from torch_geometric.data import Dataset, Data
+from torch_geometric.utils import dense_to_sparse
 
 from config import *
 from get_input import loadData
@@ -79,40 +80,130 @@ def loadDataDirectTest(mode, shuffleList, batchIndex):
 
     return image_list, label_list, bbox_list, img, adj, corr
 
+class datasetTrain(Dataset):
+    def __init__(self, root, transform=None, pre_transform=None):
+        super(datasetTrain, self).__init__(root, transform, pre_transform)
+
+    @property
+    def raw_file_names(self):
+        csv_files_sketch = os.listdir("train/sketch/GraphFeatures/")
+        jpg_files_sketch = os.listdir("train/sketch/Image/")
+        csv_files_image = os.listdir("train/image/GraphFeatures/")
+        jpg_files_image = os.listdir("train/image/Image/")
+        return csv_files_sketch + jpg_files_sketch + csv_files_image + jpg_files_image
+
+    @property
+    def processed_file_names(self):
+        processed_files_sketches = []
+        processed_files_images = []
+        for i in range(len(self.raw_file_names) // 4):
+            processed_files_sketches.append(f"data_sketch_train_{i}.pt")
+            processed_files_images.append(f"data_image_train_{i}.pt")
+        return processed_files_sketches + processed_files_images
+
+    def process(self):
+        idx = 0
+
+        for i in range(self.len()):
+            batchIndex = shuffleList[idx]
+            image_list, label_list, bbox_list, img, adj = loadData(
+                os.path.join(sketchVPath, str(batchIndex) + ".csv"),
+                os.path.join(sketchImgPath, str(batchIndex).zfill(12) + ".jpg"))
+
+            data_s = Data(image_list=image_list, x=label_list, bbox_list=bbox_list,
+                        img=img, adj=adj)
+
+            torch.save(data_s, os.path.join(self.processed_dir, f'data_sketch_train_{idx}.pt'))
+
+            batchIndex = shuffleList[idx]
+            image_list, label_list, bbox_list, img, adj = loadData(
+                os.path.join(imageVPath, str(batchIndex) + ".csv"),
+                os.path.join(imageImgPath, str(batchIndex).zfill(12) + ".jpg"))
+
+            data_i = Data(image_list=image_list, x=label_list, bbox_list=bbox_list,
+                        img=img, adj=adj)
+
+            torch.save(data_i, os.path.join(self.processed_dir, f'data_image_test_{idx}.pt'))
+
+            idx += 1
 
 class datasetTestSketch(Dataset):
-    def __init__(self, sketchImgTestPath, sketchVPathTest, shuffleList):
-        self.sketchImgTestPath = sketchImgTestPath
-        self.sketchVPathTest = sketchVPathTest
-        self.shuffleList = shuffleList
+    def __init__(self, root, transform=None, pre_transform=None):
+        super(datasetTestSketch, self).__init__(root, transform, pre_transform)
 
-    def __getitem__(self, index):
-        batchIndex = self.shuffleList[index]
-        image_list, label_list, bbox_list, img, adj, corr = loadData(
-            os.path.join(sketchVPathTest, str(batchIndex) + ".csv"),
-            os.path.join(sketchImgTestPath, str(batchIndex).zfill(12) + ".png"))
+    @property
+    def raw_file_names(self):
+        csv_files = os.listdir("test/sketch/GraphFeatures/")
+        jpg_files = os.listdir("test/sketch/Image/")
+        return csv_files + jpg_files
 
-        return image_list, label_list, bbox_list, img, adj, corr
+    @property
+    def processed_file_names(self):
+        processed_files_sketches = []
+        for i in range(len(self.raw_file_names) // 2):
+            processed_files_sketches.append(f"data_sketch_test_{i}.pt")
+        return processed_files_sketches
 
-    def __len__(self):
-        return len(self.shuffleList)
+    def process(self):
+        idx = 0
+
+        for i in range(self.len()):
+            batchIndex = shuffleListTest[idx]
+            image_list, label_list, bbox_list, img, adj = loadData(
+                os.path.join(sketchVPathTest, str(batchIndex) + ".csv"),
+                os.path.join(sketchImgTestPath, str(batchIndex).zfill(12) + ".jpg"))
+
+            data = Data(image_list=image_list, x=label_list, bbox_list=bbox_list,
+                        img=img, adj=adj)
+
+            torch.save(data, os.path.join(self.processed_dir, f'data_sketch_test_{idx}.pt'))
+            idx += 1
+
+    def len(self):
+        return len(self.processed_file_names)
+
+    def get(self, idx):
+        data = torch.load(os.path.join(self.processed_dir, f'data_sketch_test_{idx}.pt'))
+        return data
 
 
 class datasetTestImage(Dataset):
-    def __init__(self, imageImgTestPath, imageVPathTest, shuffleList):
-        self.imageImgTestPath = imageImgTestPath
-        self.imageVPathTest = imageVPathTest
-        self.shuffleList = shuffleList
+    def __init__(self, root, transform=None, pre_transform=None):
+        super(datasetTestImage, self).__init__(root, transform, pre_transform)
 
-    def __getitem__(self, index):
-        batchIndex = self.shuffleList[index]
-        image_list, label_list, bbox_list, img, adj, corr = loadData(
-            os.path.join(imageVPathTest, str(batchIndex) + ".csv"),
-            os.path.join(imageImgTestPath, str(batchIndex).zfill(12) + ".jpg"))
+    @property
+    def raw_file_names(self):
+        csv_files = os.listdir("test/image/GraphFeatures/")
+        jpg_files = os.listdir("test/image/Image/")
+        return csv_files + jpg_files
 
-        return image_list, label_list, bbox_list, img, adj, corr
+    @property
+    def processed_file_names(self):
+        processed_files_images = []
+        for i in range(len(self.raw_file_names) // 2):
+            processed_files_images.append(f"data_image_test_{i}.pt")
+        return processed_files_images
 
-    def __len__(self):
-        return len(self.shuffleList)
+    def process(self):
+        idx = 0
+
+        for i in range(self.len()):
+            batchIndex = shuffleListTest[idx]
+            image_list, label_list, bbox_list, img, adj = loadData(
+                os.path.join(imageVPathTest, str(batchIndex) + ".csv"),
+                os.path.join(imageImgTestPath, str(batchIndex).zfill(12) + ".jpg"))
+
+            data = Data(image_list=image_list, x=label_list, bbox_list=bbox_list,
+                        img=img, adj=adj)
+
+            torch.save(data, os.path.join(self.processed_dir, f'data_image_test_{idx}.pt'))
+            idx += 1
+
+    def len(self):
+        return len(self.processed_file_names)
+
+    def get(self, idx):
+        data = torch.load(os.path.join(self.processed_dir, f'data_image_test_{idx}.pt'))
+        return data
 
 

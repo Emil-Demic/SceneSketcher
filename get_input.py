@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import os
-import cv2
 import numpy as np
 import torch
 from torchvision.io import read_image
@@ -33,10 +32,6 @@ def euDistance(x, y):
 def loadData(vpath, imgpath):
     assert os.path.exists(vpath)
     assert os.path.exists(imgpath)
-
-    if "6936" in str(vpath):
-        bla = 5
-
 
     to_float = ToDtype(torch.float32, scale=True)
     img = Image(read_image(imgpath))
@@ -105,12 +100,19 @@ def loadData(vpath, imgpath):
 
     img = to_float(resize_global(img))
 
-    if len(image_list) > 1:
+    if len(image_list) > 0:
         image_list = torch.stack(image_list)
+        label_list = torch.tensor(label_list)
+        bbox_list = torch.tensor(bbox_list, dtype=torch.float32).view(-1, 4)
     else:
         image_list = torch.zeros((1, 3, 32, 32))
-    label_list = torch.tensor(label_list)
-    bbox_list = torch.tensor(bbox_list, dtype=torch.float32)
+        label_list = torch.tensor([0])
+        bbox_list = torch.zeros((1, 4), dtype=torch.float32)
+
+    # label_list = torch.tensor(label_list)
+    # bbox_list = torch.tensor(bbox_list, dtype=torch.float32)
     # bbox_list = BoundingBoxes(bbox_list, format="XYXY", canvas_size=(img_height, img_width))
 
-    return image_list, label_list, bbox_list, img, adj, corr
+    adj = adj + corr
+
+    return image_list, label_list, bbox_list, img, adj

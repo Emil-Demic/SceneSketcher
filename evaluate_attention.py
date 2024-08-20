@@ -3,7 +3,7 @@
 
 import os
 
-from torch.utils.data import DataLoader
+from torch_geometric.loader import DataLoader
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
@@ -26,11 +26,10 @@ if args.cuda:
     model.cuda()
 
 
-dataset_sketch = datasetTestSketch(sketchImgTestPath, sketchVPathTest, shuffleListTest)
-dataset_image = datasetTestImage(imageImgTestPath, imageVPathTest, shuffleListTest)
-
-dataloader_sketch = DataLoader(dataset_sketch, batch_size=batch_size, shuffle=False)
-dataloader_image = DataLoader(dataset_image, batch_size=batch_size, shuffle=False)
+dataset_sketch_test = datasetTestSketch("data")
+dataset_image_test = datasetTestImage("data")
+dataloader_sketch = DataLoader(dataset_sketch_test, batch_size=args.batch_size, shuffle=False)
+dataloader_image = DataLoader(dataset_image_test, batch_size=args.batch_size, shuffle=False)
 
 
 MaxEpoch = 'epoch1'
@@ -54,19 +53,22 @@ for i in os.listdir("model"):
             #                                                                        batchIndex)
             # print(len(batch))
             # print(batch)
-            a = model.get_embedding(*batch)
+            batch.img = batch.img.view(-1, 3, 128, 128)
+            batch.adj = batch.adj.view(-1, 15, 15)
+            a = model.get_embedding(batch)
             aList.append(a.cpu().numpy()[0])
-
-        aList = np.array(aList)
 
         for batch in tqdm.tqdm(dataloader_image):
             # image_list, label_list, bbox_list, img, adj, corr = loadDataDirectTest("image",
             #                                                                        shuffleListTest,
             #                                                                        batchIndex)
-            p = model.get_embedding(*batch)
+            batch.img = batch.img.view(-1, 3, 128, 128)
+            batch.adj = batch.adj.view(-1, 15, 15)
+            p = model.get_embedding(batch)
             pList.append(p.cpu().numpy()[0])
 
-        pList = np.array(pList)
+        aList = np.concatenate(aList)
+        pList = np.concatenate(pList)
 
         dis = compute_view_specific_distance(aList, pList)
 
