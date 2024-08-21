@@ -3,7 +3,7 @@ import os
 import numpy as np
 import torch
 from torchvision.io import read_image
-from torchvision.transforms.v2 import Resize, ToDtype
+from torchvision.transforms.v2 import Resize, ToDtype, RGB
 from torchvision.tv_tensors import BoundingBoxes, Image
 
 from config import num_categories
@@ -34,7 +34,9 @@ def loadData(vpath, imgpath):
     assert os.path.exists(imgpath)
 
     to_float = ToDtype(torch.float32, scale=True)
+    to_rgb = RGB()
     img = Image(read_image(imgpath))
+    img = to_rgb(img)
     resize_BB = Resize((32, 32))
     resize_global = Resize((128, 128))
 

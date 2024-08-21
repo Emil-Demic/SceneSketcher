@@ -6,3 +6,5 @@ model/model_full_196.pth
 tmp.py
 /train
 model/model_0.pth
+/test
+/test/image

@@ -54,11 +54,11 @@ for epoch in range(args.epochs + 1):
             batch.cuda()
         t = time.time()
         batch.img_a = batch.img_a.view(-1, 3, 128, 128)
-        batch.adj_a = batch.adj_a.view(-1, 15, 15)
+        batch.adj_a = batch.adj_a.view(-1, num_categories, num_categories)
         batch.img_p = batch.img_p.view(-1, 3, 128, 128)
-        batch.adj_p = batch.adj_p.view(-1, 15, 15)
+        batch.adj_p = batch.adj_p.view(-1, num_categories, num_categories)
         batch.img_n = batch.img_n.view(-1, 3, 128, 128)
-        batch.adj_n = batch.adj_n.view(-1, 15, 15)
+        batch.adj_n = batch.adj_n.view(-1, num_categories, num_categories)
 
         optimizer.zero_grad()
         output_a, output_p, output_n = model(batch)
@@ -91,7 +91,7 @@ for epoch in range(args.epochs + 1):
             if args.cuda:
                 batch.cuda()
             batch.img = batch.img.view(-1, 3, 128, 128)
-            batch.adj = batch.adj.view(-1, 15, 15)
+            batch.adj = batch.adj.view(-1, num_categories, num_categories)
             a = model.get_embedding(batch)
             aList.append(a.cpu().numpy())
 
@@ -99,7 +99,7 @@ for epoch in range(args.epochs + 1):
             if args.cuda:
                 batch.cuda()
             batch.img = batch.img.view(-1, 3, 128, 128)
-            batch.adj = batch.adj.view(-1, 15, 15)
+            batch.adj = batch.adj.view(-1, num_categories, num_categories)
             p = model.get_embedding(batch)
             pList.append(p.cpu().numpy())
 
