@@ -78,3 +78,16 @@ testList=shuffleListTest
 
 print(testList)
 batchImgTest = len(testList)
+
+
+shuffleList = os.listdir(sketchVPath)
+batches = len(shuffleList)
+shuffleList = [int(x.split(".")[0]) for x in shuffleList]
+
+
+imgList = os.listdir(imageImgPath)
+
+trainList=shuffleList
+
+print(trainList)
+batchImg = len(trainList)
