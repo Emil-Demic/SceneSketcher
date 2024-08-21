@@ -151,7 +151,7 @@ class datasetTestSketch(Dataset):
             batchIndex = shuffleListTest[idx]
             image_list, label_list, bbox_list, img, adj = loadData(
                 os.path.join(sketchVPathTest, str(batchIndex) + ".csv"),
-                os.path.join(sketchImgTestPath, str(batchIndex).zfill(12) + ".jpg"))
+                os.path.join(sketchImgTestPath, str(batchIndex).zfill(12) + ".png"))
 
             data = Data(image_list=image_list, x=label_list, bbox_list=bbox_list,
                         img=img, adj=adj)

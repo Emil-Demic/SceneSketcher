@@ -14,7 +14,7 @@ parser.add_argument('--fastmode', action='store_true', default=False,
 parser.add_argument('--seed', type=int, default=42, help='Random seed.')
 parser.add_argument('--epochs', type=int, default=200,
                     help='Number of epochs to train.')
-parser.add_argument('--batch_size', type=int, default=5,
+parser.add_argument('--batch_size', type=int, default=1,
                     help='Batch size.')
 parser.add_argument('--lr', type=float, default=0.0001,
                     help='Initial learning rate.')
@@ -65,8 +65,8 @@ shuffleListTest = [int(x.split(".")[0]) for x in shuffleListTest]
 
 print(shuffleListTest)
 
-shuffleList = os.listdir(sketchVPath)
-batches = len(shuffleList)
-shuffleList = [int(x.split(".")[0]) for x in shuffleList]
-
-print(shuffleList)
+# shuffleList = os.listdir(sketchVPath)
+# batches = len(shuffleList)
+# shuffleList = [int(x.split(".")[0]) for x in shuffleList]
+#
+# print(shuffleList)
