@@ -48,9 +48,11 @@ class GCNAttention(nn.Module):
 
         gcn_output = F.leaky_relu(self.gc1(gcn_input, new_adj))
 
+        global_attention = global_attention.unsqueeze(1)
+
         result_feature = torch.matmul(global_attention, gcn_output)
 
-        return result_feature
+        return result_feature.squeeze()
 
     def get_image_feature(self, image):
         return self.image_bbox_extract_net(image)

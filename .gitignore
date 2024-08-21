@@ -2,3 +2,4 @@
 __pycache__
 /data
 model/model_full_196.pth
+/html_result

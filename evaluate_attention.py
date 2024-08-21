@@ -38,6 +38,7 @@ for i in os.listdir("model"):
         continue
 
     print(os.path.join("model", i))
+    # model.load_state_dict(torch.load(os.path.join("model", i), map_location=torch.device('cpu')))
     model.load_state_dict(torch.load(os.path.join("model", i), map_location=torch.device('cpu')))
     model.eval()
     epoch_name = "Epoch " + str(i)
@@ -48,24 +49,18 @@ for i in os.listdir("model"):
     with torch.no_grad():
 
         for batch in tqdm.tqdm(dataloader_sketch):
-            # image_list, label_list, bbox_list, img, adj, corr = loadDataDirectTest("sketch",
-            #                                                                        shuffleListTest,
-            #                                                                        batchIndex)
-            # print(len(batch))
-            # print(batch)
+            batch.cuda()
             batch.img = batch.img.view(-1, 3, 128, 128)
             batch.adj = batch.adj.view(-1, 15, 15)
             a = model.get_embedding(batch)
-            aList.append(a.cpu().numpy()[0])
+            aList.append(a.cpu().numpy())
 
         for batch in tqdm.tqdm(dataloader_image):
-            # image_list, label_list, bbox_list, img, adj, corr = loadDataDirectTest("image",
-            #                                                                        shuffleListTest,
-            #                                                                        batchIndex)
+            batch.cuda()
             batch.img = batch.img.view(-1, 3, 128, 128)
             batch.adj = batch.adj.view(-1, 15, 15)
             p = model.get_embedding(batch)
-            pList.append(p.cpu().numpy()[0])
+            pList.append(p.cpu().numpy())
 
         aList = np.concatenate(aList)
         pList = np.concatenate(pList)
