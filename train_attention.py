@@ -93,9 +93,9 @@ for epoch in range(args.epochs + 1):
         batch.img_n = batch.img_n.view(-1, 3, 128, 128)
         batch.adj_n = batch.adj_n.view(-1, 15, 15)
 
-        output1, output2, output3 = model(batch)
+        output_a, output_p, output_n = model(batch)
 
-        loss = loss_fn(output1, output2, output3)
+        loss = loss_fn(output_a, output_p, output_n)
 
         # 2.1 loss regularization
 

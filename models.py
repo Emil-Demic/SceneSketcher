@@ -75,10 +75,10 @@ class TripletAttentionNet(nn.Module):
         self.embedding_net = embedding_net
 
     def forward(self, batch):
-        output_pos = self.embedding_net(batch.image_list_a, batch.x_a, batch.bbox_list_a, batch.img_a, batch.adj_a, batch.x_a_batch)
-        output_neg = self.embedding_net(batch.image_list_p, batch.x_p, batch.bbox_list_p, batch.img_p, batch.adj_p, batch.x_p_batch)
-        output_arc = self.embedding_net(batch.image_list_n, batch.x_n, batch.bbox_list_n, batch.img_n, batch.adj_n, batch.x_n_batch)
-        return output_arc, output_pos, output_neg
+        output_a = self.embedding_net(batch.image_list_a, batch.x_a, batch.bbox_list_a, batch.img_a, batch.adj_a, batch.x_a_batch)
+        output_p = self.embedding_net(batch.image_list_p, batch.x_p, batch.bbox_list_p, batch.img_p, batch.adj_p, batch.x_p_batch)
+        output_n = self.embedding_net(batch.image_list_n, batch.x_n, batch.bbox_list_n, batch.img_n, batch.adj_n, batch.x_n_batch)
+        return output_a, output_p, output_n
 
     def get_embedding(self, batch):
         return self.embedding_net(batch.image_list, batch.x, batch.bbox_list, batch.img, batch.adj, batch.batch)
