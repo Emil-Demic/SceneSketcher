@@ -83,7 +83,7 @@ dataloader_image = DataLoader(dataset_image_test, batch_size=args.batch_size * 3
 for epoch in range(args.epochs + 1):
     model.train()
     running_loss = 0.0
-    for batch in dataloader_train:
+    for i, batch in enumerate(dataloader_train):
         batch.cuda()
         t = time.time()
         batch.img_a = batch.img_a.view(-1, 3, 128, 128)
@@ -105,9 +105,9 @@ for epoch in range(args.epochs + 1):
         optimizer.step()  # update parameters of net
         running_loss += loss.item()
         # 3. update parameters of net
-        if (batch % args.batch_size) == 0 or (batch + 1) == batches:
+        if (i % args.batch_size) == 0 or (batch + 1) == batches:
             # optimizer the net
-            print('Epoch: {:04d}'.format(epoch + 1), 'Batch: {:04d}'.format(batch + 1),
+            print('Epoch: {:04d}'.format(epoch + 1), 'Batch: {:04d}'.format(i + 1),
                   'loss_train: {:.4f}'.format(running_loss / args.batch_size),
                   'time: {:.4f}s'.format(time.time() - t))
             running_loss = 0.0
