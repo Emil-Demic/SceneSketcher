@@ -10,15 +10,13 @@ from torch_geometric.utils import to_dense_adj, to_dense_batch
 from layers import GraphConvolution
 from utils_model import get_network
 import torch
-from config import num_categories, device, args
+from config import num_categories, device
 
 LOOP_NUM = 3
 
 class GCNAttention(nn.Module):
     def __init__(self, gcn_input_shape, gcn_output_shape):
         super(GCNAttention, self).__init__()
-
-        self.a = torch.arange(3, requires_grad=False).cuda().expand(args.batch_size, num_categories, 3)
 
         self.image_bbox_extract_net = get_network("inceptionv3", num_classes=2048)
         self.global_image_extract_net = get_network("inceptionv3", num_classes=num_categories)
@@ -38,14 +36,15 @@ class GCNAttention(nn.Module):
         img_features = self.image_bbox_extract_net(image_list)
         full_features = torch.concat((img_features, bbox_list), dim=1)
         # label_list -= 1
-        t = torch.zeros((img.shape[0], num_categories), requires_grad=False).cuda()
-        t.index_add_(0, batch, torch.nn.functional.one_hot(label_list, num_classes=15).float())
-        t = t.unsqueeze(2)
-        gcn_input[batch, label_list, self.a[self.a < t]] = full_features
-        # category_count = np.zeros((img.shape[0], num_categories), dtype=np.int32)
-        # for b, label, tmp_feature in zip(batch, label_list, full_features):
-        #     gcn_input[b, label - 1, category_count[b, label - 1], :] = tmp_feature
-        #     category_count[b, label - 1] += 1
+        # a = torch.arange(3, requires_grad=False).cuda().expand(img.shape[0], num_categories, 3)
+        # t = torch.zeros((img.shape[0], num_categories), requires_grad=False).cuda()
+        # t.index_add_(0, batch, torch.nn.functional.one_hot(label_list, num_classes=15).float())
+        # t = t.unsqueeze(2)
+        # gcn_input[batch, label_list, a[a < t]] = full_features
+        category_count = torch.zeros((img.shape[0], num_categories), dtype=torch.int32, requires_grad=False).cuda()
+        for b, label, tmp_feature in zip(batch, label_list, full_features):
+            gcn_input[b, label, category_count[b, label], :] = tmp_feature
+            category_count[b, label] += 1
         gcn_input = torch.transpose(gcn_input, 2, 3)
         gcn_input = self.linear(gcn_input).squeeze()
 
