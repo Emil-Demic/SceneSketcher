@@ -27,6 +27,7 @@ parser.add_argument('--dropout', type=float, default=0.5,
 
 args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
+device = torch.device("cuda:0" if args.cuda else "cpu")
 nowTime = time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime())
 
 num_categories = 15

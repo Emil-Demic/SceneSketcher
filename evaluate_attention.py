@@ -49,14 +49,16 @@ for i in os.listdir("model"):
     with torch.no_grad():
 
         for batch in tqdm.tqdm(dataloader_sketch):
-            batch.cuda()
+            if args.cuda:
+                batch.cuda()
             batch.img = batch.img.view(-1, 3, 128, 128)
             batch.adj = batch.adj.view(-1, 15, 15)
             a = model.get_embedding(batch)
             aList.append(a.cpu().numpy())
 
         for batch in tqdm.tqdm(dataloader_image):
-            batch.cuda()
+            if args.cuda:
+                batch.cuda()
             batch.img = batch.img.view(-1, 3, 128, 128)
             batch.adj = batch.adj.view(-1, 15, 15)
             p = model.get_embedding(batch)
