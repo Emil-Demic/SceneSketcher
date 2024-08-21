@@ -95,8 +95,9 @@ class datasetTrain(Dataset):
         for i in range(self.len()):
             batchIndex = shuffleList[idx]
             image_list, label_list, bbox_list, img, adj = loadData(
-                os.path.join(sketchVPath, str(batchIndex).zfill(12) + ".csv"),
-                os.path.join(sketchImgPath, str(batchIndex).zfill(12) + ".jpg"))
+                # os.path.join(sketchVPath, str(batchIndex).zfill(12) + ".csv"),
+                os.path.join(sketchVPath, str(batchIndex) + ".csv"),
+                os.path.join(sketchImgPath, str(batchIndex).zfill(12) + ".png"))
 
             data_s = Data(image_list=image_list, x=label_list, bbox_list=bbox_list,
                           img=img, adj=adj)
@@ -104,7 +105,8 @@ class datasetTrain(Dataset):
             torch.save(data_s, os.path.join(self.processed_dir, f'data_sketch_train_{idx}.pt'))
 
             image_list, label_list, bbox_list, img, adj = loadData(
-                os.path.join(imageVPath, str(batchIndex).zfill(12) + ".csv"),
+                # os.path.join(imageVPath, str(batchIndex).zfill(12) + ".csv"),
+                os.path.join(imageVPath, str(batchIndex) + ".csv"),
                 os.path.join(imageImgPath, str(batchIndex).zfill(12) + ".jpg"))
 
             data_i = Data(image_list=image_list, x=label_list, bbox_list=bbox_list,
