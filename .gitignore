@@ -3,3 +3,4 @@
 /data
 model/model_full_196.pth
 /model_template/__pycache__
+tmp.py
