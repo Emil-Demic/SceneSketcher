@@ -82,6 +82,7 @@ def loadDataDirectTest(mode, shuffleList, batchIndex):
 
     return image_list, label_list, bbox_list, img, adj, corr
 
+
 # class TripletData(Data):
 #     def __inc__(self, key, value, *args, **kwargs):
 #         if key == 'edge_index_a':
@@ -123,7 +124,7 @@ class datasetTrain(Dataset):
                 os.path.join(sketchImgPath, str(batchIndex).zfill(12) + ".png"))
 
             data_s = Data(image_list=image_list, x=label_list, bbox_list=bbox_list,
-                        img=img, adj=adj)
+                          img=img, adj=adj)
 
             torch.save(data_s, os.path.join(self.processed_dir, f'data_sketch_train_{idx}.pt'))
 
@@ -133,7 +134,7 @@ class datasetTrain(Dataset):
                 os.path.join(imageImgPath, str(batchIndex).zfill(12) + ".jpg"))
 
             data_i = Data(image_list=image_list, x=label_list, bbox_list=bbox_list,
-                        img=img, adj=adj)
+                          img=img, adj=adj)
 
             torch.save(data_i, os.path.join(self.processed_dir, f'data_image_train_{idx}.pt'))
 
@@ -152,10 +153,14 @@ class datasetTrain(Dataset):
 
         data_n = torch.load(os.path.join(self.processed_dir, f'data_image_train_{negative_idx}.pt'))
 
-        data = Data(image_list_a=data_a.image_list, x_a=data_a.x, bbox_list_a=data_a.bbox_list, img_a=data_a.img, adj_a=data_a.adj,
-                    image_list_p=data_p.image_list, x_p=data_p.x, bbox_list_p=data_p.bbox_list, img_p=data_p.img, adj_p=data_p.adj,
-                    image_list_n=data_n.image_list, x_n=data_n.x, bbox_list_n=data_n.bbox_list, img_n=data_n.img, adj_n=data_n.adj)
+        data = Data(image_list_a=data_a.image_list, x_a=data_a.x, bbox_list_a=data_a.bbox_list, img_a=data_a.img,
+                    adj_a=data_a.adj,
+                    image_list_p=data_p.image_list, x_p=data_p.x, bbox_list_p=data_p.bbox_list, img_p=data_p.img,
+                    adj_p=data_p.adj,
+                    image_list_n=data_n.image_list, x_n=data_n.x, bbox_list_n=data_n.bbox_list, img_n=data_n.img,
+                    adj_n=data_n.adj)
         return data
+
 
 class datasetTestSketch(Dataset):
     def __init__(self, root, transform=None, pre_transform=None):
@@ -235,5 +240,3 @@ class datasetTestImage(Dataset):
     def get(self, idx):
         data = torch.load(os.path.join(self.processed_dir, f'data_image_test_{idx}.pt'))
         return data
-
-

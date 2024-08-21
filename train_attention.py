@@ -7,47 +7,15 @@ from torch.nn import TripletMarginLoss
 from torch_geometric.loader import DataLoader
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-import torch
 import torch.optim as optim
-from utils import compute_view_specific_distance, loadDataDirectTest, calculate_accuracy, datasetTestSketch, \
+from utils import compute_view_specific_distance, calculate_accuracy, datasetTestSketch, \
     datasetTestImage, datasetTrain
-from get_input import loadData
 from models import GCNAttention, TripletAttentionNet
-from loss import TripletLoss
 from torch.optim import lr_scheduler
 from config import *
 import tqdm
 import numpy as np
-import random
 import time
-import os
-
-
-# def loadDataDirect(shuffleList, batchIndex):
-#     """Load citation network dataset (cora only for now)"""
-#     '''
-#             image_list: images captured according to bounding boxes
-#             label_list: labels of image_list
-#             category_list: the center coordinates and the number of bounding boxes
-#             '''
-#     batchIndex = shuffleList[batchIndex]
-#     image_list_arc, label_list_arc, bbox_list_arc, total_image_arc, adj_arc, corr_arc = loadData(
-#         os.path.join(sketchVPath, str(batchIndex) + ".csv"),
-#         os.path.join(sketchImgTrainPath, str(batchIndex).zfill(12) + ".png"))
-#
-#     image_list_pos, label_list_pos, bbox_list_pos, total_image_pos, adj_pos, corr_pos = loadData(
-#         os.path.join(imageVPath, str(batchIndex) + ".csv"),
-#         os.path.join(imageImgPath, str(batchIndex).zfill(12) + ".jpg"))
-#
-#     shuffleNum = batchIndex
-#     while shuffleNum == batchIndex:
-#         shuffleNum = shuffleList[random.randint(0, len(shuffleList) - 1)]
-#
-#     image_list_neg, label_list_neg, bbox_list_neg, total_image_neg, adj_neg, corr_neg = loadData(
-#         os.path.join(imageVPath, str(shuffleNum) + ".csv"),
-#         os.path.join(imageImgPath, str(shuffleNum).zfill(12) + ".jpg"))
-#
-#     return image_list_arc, label_list_arc, bbox_list_arc, total_image_arc, adj_arc, corr_arc, image_list_pos, label_list_pos, bbox_list_pos, total_image_pos, adj_pos, corr_pos, image_list_neg, label_list_neg, bbox_list_neg, total_image_neg, adj_neg, corr_neg
 
 
 np.random.seed(args.seed)
@@ -62,16 +30,13 @@ if args.cuda:
     print("Cuda")
     model.cuda()
 
-loss_fn = TripletMarginLoss(0.2)
+
 optimizer = optim.Adam(model.parameters(),
                        lr=args.lr)
 scheduler = lr_scheduler.StepLR(optimizer, 8, gamma=0.1, last_epoch=-1)
-
-Result_Step = 1
+loss_fn = TripletMarginLoss(margin)
 
 t_total = time.time()
-
-maxModel = "0"
 
 dataset_train = datasetTrain("data")
 dataloader_train = DataLoader(dataset_train, batch_size=args.batch_size, shuffle=True, follow_batch=['x_a', 'x_p', 'x_n'])
@@ -85,7 +50,8 @@ for epoch in range(args.epochs + 1):
     model.train()
     running_loss = 0.0
     for i, batch in enumerate(dataloader_train):
-        batch.cuda()
+        if args.cuda:
+            batch.cuda()
         t = time.time()
         batch.img_a = batch.img_a.view(-1, 3, 128, 128)
         batch.adj_a = batch.adj_a.view(-1, 15, 15)

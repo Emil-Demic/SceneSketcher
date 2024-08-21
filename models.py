@@ -27,7 +27,7 @@ class GCNAttention(nn.Module):
         # self.global_image_extract_net = resnext50_32x4d(weights=ResNeXt50_32X4D_Weights.DEFAULT)
         # self.global_image_extract_net.fc = Linear(2048, num_categories)
         self.X = nn.Parameter(torch.zeros((num_categories, num_categories), dtype=torch.float32))
-        self.linear = nn.Linear(LOOP_NUM, 1)
+        self.linear = nn.Linear(LOOP_NUM, 1, bias=False)
         nn.init.constant_(self.X, 1e-6)
         # -----------------GCN-----------------------------
         self.gc1 = GraphConvolution(gcn_input_shape, gcn_output_shape)
