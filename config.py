@@ -30,7 +30,7 @@ args.cuda = not args.no_cuda and torch.cuda.is_available()
 device = torch.device("cuda:0" if args.cuda else "cpu")
 nowTime = time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime())
 
-num_categories = 91
+num_categories = 15
 featureDim = 2052
 model_path = "./model/"
 Result_Step = 5
@@ -66,8 +66,8 @@ shuffleListTest = [int(x.split(".")[0]) for x in shuffleListTest]
 
 print(shuffleListTest)
 
-shuffleList = os.listdir(sketchVPath)
-batches = len(shuffleList)
-shuffleList = [int(x.split(".")[0]) for x in shuffleList]
-
-print(shuffleList)
+# shuffleList = os.listdir(sketchVPath)
+# batches = len(shuffleList)
+# shuffleList = [int(x.split(".")[0]) for x in shuffleList]
+#
+# print(shuffleList)

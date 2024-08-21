@@ -111,10 +111,6 @@ def loadData(vpath, imgpath):
         label_list = torch.tensor([0])
         bbox_list = torch.zeros((1, 4), dtype=torch.float32)
 
-    # label_list = torch.tensor(label_list)
-    # bbox_list = torch.tensor(bbox_list, dtype=torch.float32)
-    # bbox_list = BoundingBoxes(bbox_list, format="XYXY", canvas_size=(img_height, img_width))
-
     adj = adj + corr
 
     return image_list, label_list, bbox_list, img, adj

@@ -68,31 +68,6 @@ def calculate_accuracy(dist, epoch_name):
     return top1, top5, top10, top20
 
 
-def loadDataDirectTest(mode, shuffleList, batchIndex):
-    batchIndex = shuffleList[batchIndex]
-    if mode == "sketch":
-
-        image_list, label_list, bbox_list, img, adj, corr = loadData(
-            os.path.join(sketchVPathTest, str(batchIndex).zfill(12) + ".csv"),
-            os.path.join(sketchImgTestPath, str(batchIndex).zfill(12) + ".jpg"))
-    else:
-        image_list, label_list, bbox_list, img, adj, corr = loadData(
-            os.path.join(imageVPathTest, str(batchIndex).zfill(12) + ".csv"),
-            os.path.join(imageImgTestPath, str(batchIndex).zfill(12) + ".jpg"))
-
-    return image_list, label_list, bbox_list, img, adj, corr
-
-
-# class TripletData(Data):
-#     def __inc__(self, key, value, *args, **kwargs):
-#         if key == 'edge_index_a':
-#             return self.x_a.size(0)
-#         if key == 'edge_index_p':
-#             return self.x_p.size(0)
-#         if key == 'edge_index_n':
-#             return self.x_n.size(0)
-#         return super().__inc__(key, value, *args, **kwargs)
-
 class datasetTrain(Dataset):
     def __init__(self, root, transform=None, pre_transform=None):
         super(datasetTrain, self).__init__(root, transform, pre_transform)
@@ -128,7 +103,6 @@ class datasetTrain(Dataset):
 
             torch.save(data_s, os.path.join(self.processed_dir, f'data_sketch_train_{idx}.pt'))
 
-            batchIndex = shuffleList[idx]
             image_list, label_list, bbox_list, img, adj = loadData(
                 os.path.join(imageVPath, str(batchIndex).zfill(12) + ".csv"),
                 os.path.join(imageImgPath, str(batchIndex).zfill(12) + ".jpg"))
@@ -185,8 +159,9 @@ class datasetTestSketch(Dataset):
         for i in range(self.len()):
             batchIndex = shuffleListTest[idx]
             image_list, label_list, bbox_list, img, adj = loadData(
-                os.path.join(sketchVPathTest, str(batchIndex).zfill(12) + ".csv"),
-                os.path.join(sketchImgTestPath, str(batchIndex).zfill(12) + ".jpg"))
+                os.path.join(sketchVPathTest, str(batchIndex) + ".csv"),
+                # os.path.join(sketchVPathTest, str(batchIndex).zfill(12) + ".csv"),
+                os.path.join(sketchImgTestPath, str(batchIndex).zfill(12) + ".png"))
 
             data = Data(image_list=image_list, x=label_list, bbox_list=bbox_list,
                         img=img, adj=adj)
@@ -225,7 +200,8 @@ class datasetTestImage(Dataset):
         for i in range(self.len()):
             batchIndex = shuffleListTest[idx]
             image_list, label_list, bbox_list, img, adj = loadData(
-                os.path.join(imageVPathTest, str(batchIndex).zfill(12) + ".csv"),
+                os.path.join(imageVPathTest, str(batchIndex) + ".csv"),
+                # os.path.join(imageVPathTest, str(batchIndex).zfill(12) + ".csv"),
                 os.path.join(imageImgTestPath, str(batchIndex).zfill(12) + ".jpg"))
 
             data = Data(image_list=image_list, x=label_list, bbox_list=bbox_list,

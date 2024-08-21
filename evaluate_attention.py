@@ -30,14 +30,16 @@ dataloader_sketch = DataLoader(dataset_sketch_test, batch_size=args.batch_size, 
 dataloader_image = DataLoader(dataset_image_test, batch_size=args.batch_size, shuffle=False)
 
 
-MaxEpoch = 'epoch1'
 for i in os.listdir("model"):
     if not i.startswith("model"):
         continue
 
     print(os.path.join("model", i))
-    model.load_state_dict(torch.load(os.path.join("model", i), map_location=torch.device('cpu')))
-    # model.load_state_dict(torch.load(os.path.join("model", i)))
+    if args.cuda:
+        model.load_state_dict(torch.load(os.path.join("model", i)))
+    else:
+        model.load_state_dict(torch.load(os.path.join("model", i), map_location=torch.device('cpu')))
+
     if args.cuda:
         print("Cuda")
         model.cuda()

@@ -22,7 +22,9 @@ np.random.seed(args.seed)
 torch.manual_seed(args.seed)
 if args.cuda:
     torch.cuda.manual_seed(args.seed)
+
 margin = 1.
+
 embedding_net = GCNAttention(gcn_input_shape=featureDim, gcn_output_shape=outPutDim)
 
 model = TripletAttentionNet(embedding_net)
@@ -31,20 +33,19 @@ if args.cuda:
     model.cuda()
 
 
-optimizer = optim.Adam(model.parameters(),
-                       lr=args.lr)
-scheduler = lr_scheduler.StepLR(optimizer, 8, gamma=0.1, last_epoch=-1)
-loss_fn = TripletMarginLoss(margin)
-
-t_total = time.time()
+optimizer = optim.Adam(model.parameters(), lr=args.lr)
+# scheduler = lr_scheduler.StepLR(optimizer, 8, gamma=0.1, last_epoch=-1)
+loss_fn = TripletMarginLoss()
+if args.cuda:
+    loss_fn = loss_fn.cuda()
 
 dataset_train = datasetTrain("data")
 dataloader_train = DataLoader(dataset_train, batch_size=args.batch_size, shuffle=True, follow_batch=['x_a', 'x_p', 'x_n'])
 
 dataset_sketch_test = datasetTestSketch("data")
 dataset_image_test = datasetTestImage("data")
-dataloader_sketch = DataLoader(dataset_sketch_test, batch_size=args.batch_size * 3, shuffle=False)
-dataloader_image = DataLoader(dataset_image_test, batch_size=args.batch_size * 3, shuffle=False)
+dataloader_sketch = DataLoader(dataset_sketch_test, batch_size=args.batch_size, shuffle=False)
+dataloader_image = DataLoader(dataset_image_test, batch_size=args.batch_size, shuffle=False)
 
 for epoch in range(args.epochs + 1):
     model.train()
@@ -52,7 +53,6 @@ for epoch in range(args.epochs + 1):
     for i, batch in enumerate(dataloader_train):
         if args.cuda:
             batch.cuda()
-        t = time.time()
         batch.img_a = batch.img_a.view(-1, 3, 128, 128)
         batch.adj_a = batch.adj_a.view(-1, num_categories, num_categories)
         batch.img_p = batch.img_p.view(-1, 3, 128, 128)
@@ -60,21 +60,22 @@ for epoch in range(args.epochs + 1):
         batch.img_n = batch.img_n.view(-1, 3, 128, 128)
         batch.adj_n = batch.adj_n.view(-1, num_categories, num_categories)
 
-        optimizer.zero_grad()
         output_a, output_p, output_n = model(batch)
 
-        loss = loss_fn(output_a, output_p, output_n)
-        running_loss += loss.item()
+        loss_train = loss_fn(output_a, output_p, output_n)
 
+        # 2.1 loss regularization
+        loss = loss_train
+        # 2.2 back propagation
+        optimizer.zero_grad()  # reset gradient
         loss.backward()
         optimizer.step()  # update parameters of net
-
+        running_loss += loss.item()
         # 3. update parameters of net
         if (i % 5) == 0:
             # optimizer the net
             print('Epoch: {:04d}'.format(epoch + 1), 'Batch: {:04d}'.format(i + 1),
-                  'loss_train: {:.4f}'.format(running_loss / args.batch_size),
-                  'time: {:.4f}s'.format(time.time() - t))
+                  'loss_train: {:.4f}'.format(running_loss / 5))
             running_loss = 0.0
 
         torch.save(model.state_dict(), "model/model_" + str(epoch) + ".pth")
@@ -91,7 +92,7 @@ for epoch in range(args.epochs + 1):
             if args.cuda:
                 batch.cuda()
             batch.img = batch.img.view(-1, 3, 128, 128)
-            batch.adj = batch.adj.view(-1, num_categories, num_categories)
+            batch.adj = batch.adj.view(-1, 15, 15)
             a = model.get_embedding(batch)
             aList.append(a.cpu().numpy())
 
@@ -99,7 +100,7 @@ for epoch in range(args.epochs + 1):
             if args.cuda:
                 batch.cuda()
             batch.img = batch.img.view(-1, 3, 128, 128)
-            batch.adj = batch.adj.view(-1, num_categories, num_categories)
+            batch.adj = batch.adj.view(-1, 15, 15)
             p = model.get_embedding(batch)
             pList.append(p.cpu().numpy())
 
