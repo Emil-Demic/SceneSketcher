@@ -3,16 +3,13 @@
 
 import torch.nn as nn
 import torch.nn.functional as F
-import numpy as np
-from torch import numel
 from torch.nn import Identity, Linear
-from torch_geometric.utils import to_dense_adj, to_dense_batch
+from torchvision.models import resnext50_32x4d, ResNeXt50_32X4D_Weights
 
 from layers import GraphConvolution
 from utils_model import get_network
 import torch
 from config import num_categories, device
-from torchvision.models import resnext50_32x4d, ResNeXt50_32X4D_Weights
 
 LOOP_NUM = 3
 
@@ -20,12 +17,12 @@ class GCNAttention(nn.Module):
     def __init__(self, gcn_input_shape, gcn_output_shape):
         super(GCNAttention, self).__init__()
 
-        self.image_bbox_extract_net = get_network("inceptionv3", num_classes=2048)
-        # self.image_bbox_extract_net = resnext50_32x4d(weights=ResNeXt50_32X4D_Weights.DEFAULT)
-        # self.image_bbox_extract_net.fc = Identity()
-        self.global_image_extract_net = get_network("inceptionv3", num_classes=num_categories)
-        # self.global_image_extract_net = resnext50_32x4d(weights=ResNeXt50_32X4D_Weights.DEFAULT)
-        # self.global_image_extract_net.fc = Linear(2048, num_categories)
+        # self.image_bbox_extract_net = get_network("inceptionv3", num_classes=2048)
+        self.image_bbox_extract_net = resnext50_32x4d(weights=ResNeXt50_32X4D_Weights.DEFAULT)
+        self.image_bbox_extract_net.fc = Identity()
+        # self.global_image_extract_net = get_network("inceptionv3", num_classes=num_categories)
+        self.global_image_extract_net = resnext50_32x4d(weights=ResNeXt50_32X4D_Weights.DEFAULT)
+        self.global_image_extract_net.fc = Linear(2048, num_categories)
         self.X = nn.Parameter(torch.zeros((num_categories, num_categories), dtype=torch.float32))
         self.linear = nn.Linear(LOOP_NUM, 1, bias=False)
         nn.init.constant_(self.X, 1e-6)
