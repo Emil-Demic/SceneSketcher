@@ -35,6 +35,7 @@ class GCNAttention(nn.Module):
         gcn_input = torch.zeros((img.shape[0], num_categories, LOOP_NUM, 2052), dtype=torch.float32, requires_grad=False, device=device)
         img_features = self.image_bbox_extract_net(image_list)
         full_features = torch.concat((img_features, bbox_list), dim=1)
+        # label_list -= 1
         a = torch.arange(3, requires_grad=False, device=device).expand(img.shape[0], num_categories, 3)
         t = torch.zeros((img.shape[0], num_categories), requires_grad=False, device=device)
         t.index_add_(0, batch, torch.nn.functional.one_hot(label_list, num_classes=15).float())
