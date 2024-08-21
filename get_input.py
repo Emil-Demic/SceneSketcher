@@ -9,7 +9,7 @@ from torchvision.tv_tensors import BoundingBoxes, Image
 from config import num_categories
 
 word2vec = []
-with open("classFeature.csv", "r") as f:
+with open("coco-labels-embeddings.csv", "r") as f:
     lines = f.readlines()
     for line in lines:
         word2vec.append([float(x) for x in line.strip().split(",")])

@@ -30,7 +30,7 @@ args.cuda = not args.no_cuda and torch.cuda.is_available()
 device = torch.device("cuda:0" if args.cuda else "cpu")
 nowTime = time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime())
 
-num_categories = 15
+num_categories = 91
 featureDim = 2052
 model_path = "./model/"
 Result_Step = 5
