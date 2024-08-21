@@ -105,7 +105,7 @@ for epoch in range(args.epochs + 1):
         optimizer.step()  # update parameters of net
         running_loss += loss.item()
         # 3. update parameters of net
-        if (i % args.batch_size) == 0 or (batch + 1) == batches:
+        if (i % args.batch_size) == 0 or (i + 1) == batches:
             # optimizer the net
             print('Epoch: {:04d}'.format(epoch + 1), 'Batch: {:04d}'.format(i + 1),
                   'loss_train: {:.4f}'.format(running_loss / args.batch_size),
