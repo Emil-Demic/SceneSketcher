@@ -3,10 +3,13 @@
 
 import os
 
+from torch_geometric.loader import DataLoader
+
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 import torch
 import torch.optim as optim
-from utils import compute_view_specific_distance, loadDataDirectTest, calculate_accuracy
+from utils import compute_view_specific_distance, loadDataDirectTest, calculate_accuracy, datasetTestSketch, \
+    datasetTestImage, datasetTrain
 from get_input import loadData
 from models import GCNAttention, TripletAttentionNet
 from loss import TripletLoss
@@ -19,31 +22,31 @@ import time
 import os
 
 
-def loadDataDirect(shuffleList, batchIndex):
-    """Load citation network dataset (cora only for now)"""
-    '''
-            image_list: images captured according to bounding boxes
-            label_list: labels of image_list
-            category_list: the center coordinates and the number of bounding boxes
-            '''
-    batchIndex = shuffleList[batchIndex]
-    image_list_arc, label_list_arc, bbox_list_arc, total_image_arc, adj_arc, corr_arc = loadData(
-        os.path.join(sketchVPath, str(batchIndex) + ".csv"),
-        os.path.join(sketchImgTrainPath, str(batchIndex).zfill(12) + ".png"))
-
-    image_list_pos, label_list_pos, bbox_list_pos, total_image_pos, adj_pos, corr_pos = loadData(
-        os.path.join(imageVPath, str(batchIndex) + ".csv"),
-        os.path.join(imageImgPath, str(batchIndex).zfill(12) + ".jpg"))
-
-    shuffleNum = batchIndex
-    while shuffleNum == batchIndex:
-        shuffleNum = shuffleList[random.randint(0, len(shuffleList) - 1)]
-
-    image_list_neg, label_list_neg, bbox_list_neg, total_image_neg, adj_neg, corr_neg = loadData(
-        os.path.join(imageVPath, str(shuffleNum) + ".csv"),
-        os.path.join(imageImgPath, str(shuffleNum).zfill(12) + ".jpg"))
-
-    return image_list_arc, label_list_arc, bbox_list_arc, total_image_arc, adj_arc, corr_arc, image_list_pos, label_list_pos, bbox_list_pos, total_image_pos, adj_pos, corr_pos, image_list_neg, label_list_neg, bbox_list_neg, total_image_neg, adj_neg, corr_neg
+# def loadDataDirect(shuffleList, batchIndex):
+#     """Load citation network dataset (cora only for now)"""
+#     '''
+#             image_list: images captured according to bounding boxes
+#             label_list: labels of image_list
+#             category_list: the center coordinates and the number of bounding boxes
+#             '''
+#     batchIndex = shuffleList[batchIndex]
+#     image_list_arc, label_list_arc, bbox_list_arc, total_image_arc, adj_arc, corr_arc = loadData(
+#         os.path.join(sketchVPath, str(batchIndex) + ".csv"),
+#         os.path.join(sketchImgTrainPath, str(batchIndex).zfill(12) + ".png"))
+#
+#     image_list_pos, label_list_pos, bbox_list_pos, total_image_pos, adj_pos, corr_pos = loadData(
+#         os.path.join(imageVPath, str(batchIndex) + ".csv"),
+#         os.path.join(imageImgPath, str(batchIndex).zfill(12) + ".jpg"))
+#
+#     shuffleNum = batchIndex
+#     while shuffleNum == batchIndex:
+#         shuffleNum = shuffleList[random.randint(0, len(shuffleList) - 1)]
+#
+#     image_list_neg, label_list_neg, bbox_list_neg, total_image_neg, adj_neg, corr_neg = loadData(
+#         os.path.join(imageVPath, str(shuffleNum) + ".csv"),
+#         os.path.join(imageImgPath, str(shuffleNum).zfill(12) + ".jpg"))
+#
+#     return image_list_arc, label_list_arc, bbox_list_arc, total_image_arc, adj_arc, corr_arc, image_list_pos, label_list_pos, bbox_list_pos, total_image_pos, adj_pos, corr_pos, image_list_neg, label_list_neg, bbox_list_neg, total_image_neg, adj_neg, corr_neg
 
 
 np.random.seed(args.seed)
@@ -55,6 +58,7 @@ embedding_net = GCNAttention(gcn_input_shape=featureDim, gcn_output_shape=outPut
 
 model = TripletAttentionNet(embedding_net)
 if args.cuda:
+    print("Cuda")
     model.cuda()
 
 loss_fn = TripletLoss(margin)
@@ -68,23 +72,29 @@ t_total = time.time()
 
 maxModel = "0"
 
+dataset_train = datasetTrain("data")
+dataloader_train = DataLoader(dataset_train, batch_size=args.batch_size, shuffle=True, follow_batch=['x_a', 'x_p', 'x_n'])
+
+dataset_sketch_test = datasetTestSketch("data")
+dataset_image_test = datasetTestImage("data")
+dataloader_sketch = DataLoader(dataset_sketch_test, batch_size=args.batch_size * 3, shuffle=False)
+dataloader_image = DataLoader(dataset_image_test, batch_size=args.batch_size * 3, shuffle=False)
+
 for epoch in range(args.epochs + 1):
     model.train()
-    random.shuffle(shuffleList)
     running_loss = 0.0
-    for batch in range(batches):
+    for batch in dataloader_train:
+        batch.cuda()
         t = time.time()
+        batch.img_a = batch.img_a.view(-1, 3, 128, 128)
+        batch.adj_a = batch.adj_a.view(-1, 15, 15)
+        batch.img_p = batch.img_p.view(-1, 3, 128, 128)
+        batch.adj_p = batch.adj_p.view(-1, 15, 15)
+        batch.img_n = batch.img_n.view(-1, 3, 128, 128)
+        batch.adj_n = batch.adj_n.view(-1, 15, 15)
 
-        (image_list_arc, label_list_arc, category_list_arc, total_image_arc, adj_arc, corr_arc, image_list_pos,
-                label_list_pos, category_list_pos, total_image_pos, adj_pos, corr_pos, image_list_neg, label_list_neg,
-                category_list_neg, total_image_neg, adj_neg, corr_neg) = loadDataDirect(shuffleList, batch)
+        output1, output2, output3 = model(batch)
 
-        output1, output2, output3 = model(image_list_arc, label_list_arc, category_list_arc, total_image_arc, adj_arc,
-                                          corr_arc, image_list_pos, label_list_pos, category_list_pos, total_image_pos,
-                                          adj_pos, corr_pos, image_list_neg, label_list_neg, category_list_neg,
-                                          total_image_neg, adj_neg, corr_neg)
-
-        #
         loss = loss_fn(output1, output2, output3)
 
         # 2.1 loss regularization
@@ -95,10 +105,10 @@ for epoch in range(args.epochs + 1):
         optimizer.step()  # update parameters of net
         running_loss += loss.item()
         # 3. update parameters of net
-        if (batch % batch_size) == 0 or (batch + 1) == batches:
+        if (batch % args.batch_size) == 0 or (batch + 1) == batches:
             # optimizer the net
             print('Epoch: {:04d}'.format(epoch + 1), 'Batch: {:04d}'.format(batch + 1),
-                  'loss_train: {:.4f}'.format(running_loss / batch_size),
+                  'loss_train: {:.4f}'.format(running_loss / args.batch_size),
                   'time: {:.4f}s'.format(time.time() - t))
             running_loss = 0.0
 
@@ -112,23 +122,24 @@ for epoch in range(args.epochs + 1):
 
     with torch.no_grad():
 
-        for batchIndex in tqdm.tqdm(range(batchesTest)):
-            image_list, label_list, bbox_list, img, adj, corr = loadDataDirectTest("sketch",
-                                                                                   shuffleListTest,
-                                                                                   batchIndex)
-            a = model.get_embedding(image_list, label_list, bbox_list, img, adj, corr)
-            aList.append(a.cpu().numpy()[0])
+        for batch in tqdm.tqdm(dataloader_sketch):
+            if args.cuda:
+                batch.cuda()
+            batch.img = batch.img.view(-1, 3, 128, 128)
+            batch.adj = batch.adj.view(-1, 15, 15)
+            a = model.get_embedding(batch)
+            aList.append(a.cpu().numpy())
 
-        aList = np.array(aList)
+        for batch in tqdm.tqdm(dataloader_image):
+            if args.cuda:
+                batch.cuda()
+            batch.img = batch.img.view(-1, 3, 128, 128)
+            batch.adj = batch.adj.view(-1, 15, 15)
+            p = model.get_embedding(batch)
+            pList.append(p.cpu().numpy())
 
-        for batchIndex in tqdm.tqdm(range(batchesTest)):
-            image_list, label_list, bbox_list, img, adj, corr = loadDataDirectTest("image",
-                                                                                   shuffleListTest,
-                                                                                   batchIndex)
-            p = model.get_embedding(image_list, label_list, bbox_list, img, adj, corr)
-            pList.append(p.cpu().numpy()[0])
-
-        pList = np.array(pList)
+        aList = np.concatenate(aList)
+        pList = np.concatenate(pList)
 
         dis = compute_view_specific_distance(aList, pList)
 

@@ -1,3 +1,5 @@
+import random
+
 import scipy.spatial.distance as ssd
 import torch
 from torch_geometric.data import Dataset, Data
@@ -80,6 +82,16 @@ def loadDataDirectTest(mode, shuffleList, batchIndex):
 
     return image_list, label_list, bbox_list, img, adj, corr
 
+# class TripletData(Data):
+#     def __inc__(self, key, value, *args, **kwargs):
+#         if key == 'edge_index_a':
+#             return self.x_a.size(0)
+#         if key == 'edge_index_p':
+#             return self.x_p.size(0)
+#         if key == 'edge_index_n':
+#             return self.x_n.size(0)
+#         return super().__inc__(key, value, *args, **kwargs)
+
 class datasetTrain(Dataset):
     def __init__(self, root, transform=None, pre_transform=None):
         super(datasetTrain, self).__init__(root, transform, pre_transform)
@@ -108,7 +120,7 @@ class datasetTrain(Dataset):
             batchIndex = shuffleList[idx]
             image_list, label_list, bbox_list, img, adj = loadData(
                 os.path.join(sketchVPath, str(batchIndex) + ".csv"),
-                os.path.join(sketchImgPath, str(batchIndex).zfill(12) + ".jpg"))
+                os.path.join(sketchImgPath, str(batchIndex).zfill(12) + ".png"))
 
             data_s = Data(image_list=image_list, x=label_list, bbox_list=bbox_list,
                         img=img, adj=adj)
@@ -123,9 +135,27 @@ class datasetTrain(Dataset):
             data_i = Data(image_list=image_list, x=label_list, bbox_list=bbox_list,
                         img=img, adj=adj)
 
-            torch.save(data_i, os.path.join(self.processed_dir, f'data_image_test_{idx}.pt'))
+            torch.save(data_i, os.path.join(self.processed_dir, f'data_image_train_{idx}.pt'))
 
             idx += 1
+
+    def len(self):
+        return len(self.processed_file_names) // 2
+
+    def get(self, idx):
+        data_a = torch.load(os.path.join(self.processed_dir, f'data_sketch_train_{idx}.pt'))
+        data_p = torch.load(os.path.join(self.processed_dir, f'data_image_train_{idx}.pt'))
+
+        negative_idx = random.randint(0, self.len() - 1)
+        while negative_idx == idx:
+            negative_idx = random.randint(0, self.len() - 1)
+
+        data_n = torch.load(os.path.join(self.processed_dir, f'data_image_train_{negative_idx}.pt'))
+
+        data = Data(image_list_a=data_a.image_list, x_a=data_a.x, bbox_list_a=data_a.bbox_list, img_a=data_a.img, adj_a=data_a.adj,
+                    image_list_p=data_p.image_list, x_p=data_p.x, bbox_list_p=data_p.bbox_list, img_p=data_p.img, adj_p=data_p.adj,
+                    image_list_n=data_n.image_list, x_n=data_n.x, bbox_list_n=data_n.bbox_list, img_n=data_n.img, adj_n=data_n.adj)
+        return data
 
 class datasetTestSketch(Dataset):
     def __init__(self, root, transform=None, pre_transform=None):

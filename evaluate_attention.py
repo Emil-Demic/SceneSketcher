@@ -36,8 +36,8 @@ for i in os.listdir("model"):
         continue
 
     print(os.path.join("model", i))
-    # model.load_state_dict(torch.load(os.path.join("model", i), map_location=torch.device('cpu')))
-    model.load_state_dict(torch.load(os.path.join("model", i)))
+    model.load_state_dict(torch.load(os.path.join("model", i), map_location=torch.device('cpu')))
+    # model.load_state_dict(torch.load(os.path.join("model", i)))
     if args.cuda:
         print("Cuda")
         model.cuda()
