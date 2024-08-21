@@ -120,7 +120,7 @@ class datasetTrain(Dataset):
         for i in range(self.len()):
             batchIndex = shuffleList[idx]
             image_list, label_list, bbox_list, img, adj = loadData(
-                os.path.join(sketchVPath, str(batchIndex) + ".csv"),
+                os.path.join(sketchVPath, str(batchIndex).zfill(12) + ".csv"),
                 os.path.join(sketchImgPath, str(batchIndex).zfill(12) + ".jpg"))
 
             data_s = Data(image_list=image_list, x=label_list, bbox_list=bbox_list,
@@ -225,7 +225,7 @@ class datasetTestImage(Dataset):
         for i in range(self.len()):
             batchIndex = shuffleListTest[idx]
             image_list, label_list, bbox_list, img, adj = loadData(
-                os.path.join(imageVPathTest, str(batchIndex) + ".csv"),
+                os.path.join(imageVPathTest, str(batchIndex).zfill(12) + ".csv"),
                 os.path.join(imageImgTestPath, str(batchIndex).zfill(12) + ".jpg"))
 
             data = Data(image_list=image_list, x=label_list, bbox_list=bbox_list,
