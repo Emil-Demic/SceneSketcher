@@ -73,11 +73,11 @@ def loadDataDirectTest(mode, shuffleList, batchIndex):
     if mode == "sketch":
 
         image_list, label_list, bbox_list, img, adj, corr = loadData(
-            os.path.join(sketchVPathTest, str(batchIndex) + ".csv"),
+            os.path.join(sketchVPathTest, str(batchIndex).zfill(12) + ".csv"),
             os.path.join(sketchImgTestPath, str(batchIndex).zfill(12) + ".jpg"))
     else:
         image_list, label_list, bbox_list, img, adj, corr = loadData(
-            os.path.join(imageVPathTest, str(batchIndex) + ".csv"),
+            os.path.join(imageVPathTest, str(batchIndex).zfill(12) + ".csv"),
             os.path.join(imageImgTestPath, str(batchIndex).zfill(12) + ".jpg"))
 
     return image_list, label_list, bbox_list, img, adj, corr
@@ -130,7 +130,7 @@ class datasetTrain(Dataset):
 
             batchIndex = shuffleList[idx]
             image_list, label_list, bbox_list, img, adj = loadData(
-                os.path.join(imageVPath, str(batchIndex) + ".csv"),
+                os.path.join(imageVPath, str(batchIndex).zfill(12) + ".csv"),
                 os.path.join(imageImgPath, str(batchIndex).zfill(12) + ".jpg"))
 
             data_i = Data(image_list=image_list, x=label_list, bbox_list=bbox_list,
@@ -185,7 +185,7 @@ class datasetTestSketch(Dataset):
         for i in range(self.len()):
             batchIndex = shuffleListTest[idx]
             image_list, label_list, bbox_list, img, adj = loadData(
-                os.path.join(sketchVPathTest, str(batchIndex) + ".csv"),
+                os.path.join(sketchVPathTest, str(batchIndex).zfill(12) + ".csv"),
                 os.path.join(sketchImgTestPath, str(batchIndex).zfill(12) + ".jpg"))
 
             data = Data(image_list=image_list, x=label_list, bbox_list=bbox_list,
