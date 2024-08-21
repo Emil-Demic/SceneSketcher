@@ -21,7 +21,7 @@ def outputHtml(sketchindex, indexList):
     tmpLine = "<tr>"
 
     tmpLine += "<td><image src='%s' width=256 /></td>" % (
-        os.path.join(sketchPath, str(shuffleListTest[sketchindex]).zfill(12) + ".png"))
+        os.path.join(sketchPath, str(shuffleListTest[sketchindex]).zfill(12) + ".jpg"))
     for i in indexList:
         if i != sketchindex:
             tmpLine += "<td><image src='%s' width=256 /></td>" % (
@@ -74,7 +74,7 @@ def loadDataDirectTest(mode, shuffleList, batchIndex):
 
         image_list, label_list, bbox_list, img, adj, corr = loadData(
             os.path.join(sketchVPathTest, str(batchIndex) + ".csv"),
-            os.path.join(sketchImgTestPath, str(batchIndex).zfill(12) + ".png"))
+            os.path.join(sketchImgTestPath, str(batchIndex).zfill(12) + ".jpg"))
     else:
         image_list, label_list, bbox_list, img, adj, corr = loadData(
             os.path.join(imageVPathTest, str(batchIndex) + ".csv"),
@@ -121,7 +121,7 @@ class datasetTrain(Dataset):
             batchIndex = shuffleList[idx]
             image_list, label_list, bbox_list, img, adj = loadData(
                 os.path.join(sketchVPath, str(batchIndex) + ".csv"),
-                os.path.join(sketchImgPath, str(batchIndex).zfill(12) + ".png"))
+                os.path.join(sketchImgPath, str(batchIndex).zfill(12) + ".jpg"))
 
             data_s = Data(image_list=image_list, x=label_list, bbox_list=bbox_list,
                           img=img, adj=adj)
@@ -186,7 +186,7 @@ class datasetTestSketch(Dataset):
             batchIndex = shuffleListTest[idx]
             image_list, label_list, bbox_list, img, adj = loadData(
                 os.path.join(sketchVPathTest, str(batchIndex) + ".csv"),
-                os.path.join(sketchImgTestPath, str(batchIndex).zfill(12) + ".png"))
+                os.path.join(sketchImgTestPath, str(batchIndex).zfill(12) + ".jpg"))
 
             data = Data(image_list=image_list, x=label_list, bbox_list=bbox_list,
                         img=img, adj=adj)
