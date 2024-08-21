@@ -39,7 +39,7 @@ for i in os.listdir("model"):
 
     print(os.path.join("model", i))
     # model.load_state_dict(torch.load(os.path.join("model", i), map_location=torch.device('cpu')))
-    model.load_state_dict(torch.load(os.path.join("model", i), map_location=torch.device('cpu')))
+    model.load_state_dict(torch.load(os.path.join("model", i)))
     model.eval()
     epoch_name = "Epoch " + str(i)
 
