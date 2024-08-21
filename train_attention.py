@@ -3,6 +3,7 @@
 
 import os
 
+from torch.nn import TripletMarginLoss
 from torch_geometric.loader import DataLoader
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
@@ -61,7 +62,7 @@ if args.cuda:
     print("Cuda")
     model.cuda()
 
-loss_fn = TripletLoss(margin)
+loss_fn = TripletMarginLoss(0.2)
 optimizer = optim.Adam(model.parameters(),
                        lr=args.lr)
 scheduler = lr_scheduler.StepLR(optimizer, 8, gamma=0.1, last_epoch=-1)
@@ -93,17 +94,15 @@ for epoch in range(args.epochs + 1):
         batch.img_n = batch.img_n.view(-1, 3, 128, 128)
         batch.adj_n = batch.adj_n.view(-1, 15, 15)
 
+        optimizer.zero_grad()
         output_a, output_p, output_n = model(batch)
 
         loss = loss_fn(output_a, output_p, output_n)
+        running_loss += loss.item()
 
-        # 2.1 loss regularization
-
-        # 2.2 back propagation
-        optimizer.zero_grad()  # reset gradient
         loss.backward()
         optimizer.step()  # update parameters of net
-        running_loss += loss.item()
+
         # 3. update parameters of net
         if (i % 5) == 0:
             # optimizer the net
