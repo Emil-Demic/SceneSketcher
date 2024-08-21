@@ -22,8 +22,6 @@ if args.cuda:
 embedding_net = GCNAttention(gcn_input_shape=featureDim, gcn_output_shape=outPutDim)
 
 model = TripletAttentionNet(embedding_net)
-if args.cuda:
-    model.cuda()
 
 
 dataset_sketch_test = datasetTestSketch("data")
@@ -40,6 +38,9 @@ for i in os.listdir("model"):
     print(os.path.join("model", i))
     # model.load_state_dict(torch.load(os.path.join("model", i), map_location=torch.device('cpu')))
     model.load_state_dict(torch.load(os.path.join("model", i)))
+    if args.cuda:
+        print("Cuda")
+        model.cuda()
     model.eval()
     epoch_name = "Epoch " + str(i)
 
