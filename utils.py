@@ -198,9 +198,11 @@ class datasetTestImage(Dataset):
 
     def process(self):
         idx = 0
+        file_list = os.listdir(imageVPathTest)
+        file_list = [int(x.split(".")[0]) for x in file_list]
 
         for i in range(self.len()):
-            batchIndex = shuffleListTest[idx]
+            batchIndex = file_list[idx]
             image_list, label_list, bbox_list, img, adj = loadData(
                 os.path.join(imageVPathTest, str(batchIndex) + ".csv"),
                 # os.path.join(imageVPathTest, str(batchIndex).zfill(12) + ".csv"),
